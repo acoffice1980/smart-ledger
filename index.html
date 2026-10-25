@@ -352,7 +352,7 @@ class Col{
   const t=this.t,out=[],step=1000;let from=0;
   for(;;){
    let q=sb.from(t.tbl).select('*');
-   for(const [k,op,v] of filters)q=op==='in'?q.in(k,v):q.eq(k,v);
+   for(const [k,op,v] of filters)q=op==='in'?q.in(k,v):op==='neq'?q.neq(k,v):q.eq(k,v);
    if(this.ord&&this.ord!==t.pk)q=q.order(this.ord,{ascending:true});
    q=q.order(t.pk,{ascending:true}).range(from,from+step-1);
    const rows=chk(await q);out.push(...rows);
@@ -392,7 +392,7 @@ class Col{
 }
 class Tbl{
  constructor(name,tbl,pk='id'){this.name=name;this.tbl=tbl;this.pk=pk}
- where(f){return{equals:v=>new Col(this,[[f,'eq',v]]),anyOf:a=>new Col(this,[[f,'in',[...a]]])}}
+ where(f){return{equals:v=>new Col(this,[[f,'eq',v]]),notEqual:v=>new Col(this,[[f,'neq',v]]),anyOf:a=>new Col(this,[[f,'in',[...a]]])}}
  orderBy(f){return new Col(this,[],[],f)} reverse(){return new Col(this,[],[],null,true)}
  toArray(){return new Col(this).toArray()}
  async add(o){const d=chk(await sb.from(this.tbl).insert(pick(this.name,o)).select(this.pk).single());return d[this.pk]}
