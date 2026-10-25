@@ -2742,14 +2742,22 @@ const fail=m=>Utils.toast(m,'error');
 A.init=async()=>{};
 A.login=async(username,password)=>{
  let {data,error}=await sb.auth.signInWithPassword({email:mail(username),password:tf(password)});
+ if(error)console.warn('login error:',error.message);
  if(error&&/^admin$/i.test(username.trim())&&password==='1980'&&/invalid/i.test(error.message)){
   const su=await sb.auth.signUp({email:mail('ADMIN'),password:tf('1980')});
-  if(!su.error&&su.data.session&&su.data.user&&su.data.user.identities&&su.data.user.identities.length){data=su.data;error=null}
-  else if(!su.error&&!su.data.session){fail('Supabase मध्ये "Confirm email" OFF करा (Authentication → Sign In / Providers → Email).');return false}
+  if(su.error&&!/registered/i.test(su.error.message)){fail('Supabase: '+su.error.message);return false}
+  if(!su.error){
+   if(su.data.session&&su.data.user&&su.data.user.identities&&su.data.user.identities.length){data=su.data;error=null}
+   else if(!su.data.session){fail('ADMIN user बनला पण email confirm नाही. Supabase SQL Editor मध्ये हे run करा: update auth.users set email_confirmed_at = now() where email_confirmed_at is null;');return false}
+  }
  }
- if(error){fail(/confirm/i.test(error.message)?'Supabase मध्ये "Confirm email" OFF करा.':'Invalid Username or Password!');return false}
+ if(error){
+  const m=error.message;
+  fail(/not confirmed/i.test(m)?'Email confirm नाही. Supabase SQL Editor मध्ये run करा: update auth.users set email_confirmed_at = now() where email_confirmed_at is null;':/invalid/i.test(m)?'Invalid Username or Password!':'Supabase: '+m);
+  return false;
+ }
  const {data:p}=await sb.from('profiles').select('*').eq('id',data.user.id).maybeSingle();
- if(!p||!p.approved){await sb.auth.signOut();fail('हा user अजून approve नाही. Admin ला सांगा.');return false}
+ if(!p||!p.approved){await sb.auth.signOut();fail(p?'हा user अजून approve नाही. Admin ला सांगा.':'Profile सापडली नाही. supabase_update.sql run केले का?');return false}
  State.currentUser={id:p.id,username:p.username,role:p.role,hint:p.hint||''};
  await db.activityLog.add({username:p.username,action:'LOGIN',loggedAt:Utils.nowStr()});
  Utils.toast(`Welcome, ${p.username}!`,'success');
