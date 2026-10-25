@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART LEDGER ☁️ — made by Lucky Dahivadkar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.0/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root {
+    --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-sidebar: #0f172a;
+    --text-primary: #1e293b; --text-secondary: #64748b; --text-sidebar: #cbd5e1;
+    --accent: #004080; --accent-hover: #0055aa; --border: #e2e8f0;
+    --success: #28a745; --danger: #dc3545; --warning: #ffc107; --info: #17a2b8;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius: 8px; --font-en: 'Inter', 'Poppins', sans-serif; --font-mr: 'Noto Sans Devanagari', sans-serif;
+}
+[data-theme="Blue"] { --bg-primary: #f0f7ff; --accent: #004080; --bg-sidebar: #002244; }
+[data-theme="Green"] { --bg-primary: #f0fdf4; --accent: #166534; --bg-sidebar: #052e16; }
+[data-theme="Pink"] { --bg-primary: #fdf2f8; --accent: #9d174d; --bg-sidebar: #500724; }
+[data-theme="Dark"] { --bg-primary: #0f172a; --bg-secondary: #1e293b; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --border: #334155; --bg-sidebar: #020617; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-en); background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; }
+.marathi { font-family: var(--font-mr); }
+.hidden { display: none !important; }
+.flex { display: flex; } .flex-col { flex-direction: column; }
+.items-center { align-items: center; } .justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; } .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; }
+.p-2 { padding: 0.5rem; } .p-4 { padding: 1rem; } .p-6 { padding: 1.5rem; }
+.mt-2 { margin-top: 0.5rem; } .mt-4 { margin-top: 1rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-4 { margin-bottom: 1rem; }
+.ml-2 { margin-left: 0.5rem; } .ml-6 { margin-left: 1.5rem; }
+.w-full { width: 100%; } .h-full { height: 100%; } .text-center { text-align: center; } .font-bold { font-weight: 700; }
+.btn { padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font-en); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+.btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: var(--accent-hover); }
+.btn-success { background: var(--success); color: white; } .btn-danger { background: var(--danger); color: white; }
+.btn-warning { background: var(--warning); color: #000; } .btn-info { background: var(--info); color: white; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--border); } .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+.input { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.95rem; background: var(--bg-secondary); color: var(--text-primary); }
+.input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+textarea.input { resize: vertical; font-family: inherit; }
+#splash-screen { position: fixed; inset: 0; background: var(--bg-primary); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.progress-bar { width: 320px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 2rem; }
+.progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
+.auth-container { max-width: 420px; margin: auto; background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+.fy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.fy-card { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: var(--radius); padding: 1.5rem; cursor: pointer; transition: all 0.2s; position: relative; }
+.fy-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.fy-card.active { border-color: var(--success); background: #f0fdf4; }
+.fy-card.locked { opacity: 0.7; }
+.fy-card.locked::after { content: "🔒 LOCKED"; position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.fy-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 10; }
+#main-app { display: flex; height: 100vh; }
+.sidebar { width: 260px; background: var(--bg-sidebar); color: var(--text-sidebar); display: flex; flex-direction: column; transition: width 0.3s; overflow-y: auto; }
+.sidebar.collapsed { width: 60px; } .sidebar.collapsed .sidebar-text, .sidebar.collapsed .nav-header span:last-child, .sidebar.collapsed .nav-btn span { display: none; }
+.sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.nav-group { margin: 0.5rem 0; }
+.nav-header { padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; font-weight: 600; border-radius: var(--radius); margin: 0 0.5rem; }
+.nav-header:hover { background: rgba(255,255,255,0.1); }
+.nav-items { display: none; padding-left: 1rem; } .nav-items.open { display: block; }
+.nav-btn { width: 100%; text-align: left; padding: 0.6rem 1rem; background: none; border: none; color: var(--text-sidebar); cursor: pointer; border-radius: var(--radius); font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+.nav-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.sidebar-footer { margin-top: auto; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; text-align: center; opacity: 0.7; }
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { height: 60px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
+.fy-badge { background: var(--accent); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+.content-area { flex: 1; overflow-y: auto; padding: 1.5rem; }
+.status-bar { height: 32px; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+.card { background: var(--bg-secondary); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.5rem; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.data-table th { background: var(--accent); color: white; padding: 0.75rem; text-align: left; font-weight: 600; position: sticky; top: 0; cursor: pointer; }
+.data-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+.data-table tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+.data-table tr:hover { background: rgba(0,64,128,0.05); cursor: pointer; }
+.bank-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.autocomplete-wrapper { position: relative; flex: 1; }
+.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); max-height: 150px; overflow-y: auto; z-index: 100; box-shadow: var(--shadow); }
+.autocomplete-item { padding: 0.5rem; cursor: pointer; }
+.autocomplete-item:hover, .autocomplete-item.active { background: var(--accent); color: white; }
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+.toast { padding: 1rem 1.5rem; border-radius: var(--radius); color: white; font-weight: 500; box-shadow: var(--shadow); animation: slideIn 0.3s ease; min-width: 250px; }
+.toast.success { background: var(--success); } .toast.error { background: var(--danger); } .toast.info { background: var(--accent); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--bg-secondary); border-radius: var(--radius); width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+.modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 1.5rem; } .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.5rem; }
+.picker-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.picker-item { padding: 0.75rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+.picker-item:hover { background: var(--accent); color: white; }
+.print-preview-box { border: 1px solid var(--border); padding: 1rem; background: white; color: black; font-size: 12px; }
+.print-preview-box .sec-title { background: #004080; color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 3px; margin: 5px 0 4px 0; }
+.print-preview-box table { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 11.5px; }
+.print-preview-box td { padding: 3px 6px; border: 1px solid #dde; }
+.print-preview-box .lbl { font-weight: bold; color: #004080; width: 34%; white-space: nowrap; }
+#snake-canvas { background: #0d0d1a; border: 2px solid #00ff88; border-radius: 4px; }
+/* Statement Tracker */
+.bank-stmt-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; background: var(--bg-primary); }
+.stmt-status { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.stmt-pending { background: #fee2e2; color: #991b1b; }
+.stmt-partial { background: #fef3c7; color: #92400e; }
+.stmt-full { background: #d1fae5; color: #065f46; }
+.stmt-closed { background: #e5e7eb; color: #374151; }
+.timeline { display: flex; height: 24px; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; background: #fee2e2; }
+.timeline-segment { height: 100%; transition: all 0.2s; }
+.timeline-segment.received { background: #10b981; }
+.timeline-segment.pending { background: #ef4444; }
+.month-chip { display: inline-block; padding: 0.25rem 0.6rem; margin: 0.2rem; border-radius: 12px; background: var(--border); cursor: pointer; font-size: 0.8rem; }
+.month-chip.selected { background: var(--success); color: white; }
+.backup-banner { background: #fef3c7; border-left: 4px solid var(--warning); padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+/* Tabs */
+.tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 1rem; }
+.tab { padding: 0.6rem 1rem; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: var(--text-secondary); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* Pie Chart */
+.pie-container { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+.bank-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: middle; margin-right: 0.5rem; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style id="glass-ui">
+/* ===== GLASS UI LAYER (design only; app logic untouched) ===== */
+:root{--bg1:#1e1b4b;--bg2:#312e81;--bg3:#0e7490;--a1:#8b5cf6;--a2:#22d3ee;--blur:18px;--spd:1;--field:rgba(255,255,255,.08);--glass-brd:rgba(255,255,255,.2);
+--grad:linear-gradient(135deg,var(--a1),var(--a2));--font-ui:'Plus Jakarta Sans','Inter','Noto Sans Devanagari',sans-serif}
+html{color-scheme:dark}html[data-mode=light]{color-scheme:light}
+body{font-family:var(--font-ui);background:linear-gradient(125deg,var(--bg1),var(--bg2),var(--bg3),var(--bg1));background-size:320% 320%;animation:gflow calc(22s/var(--spd)) ease infinite}
+@keyframes gflow{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-orbs i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:orb calc(20s/var(--spd)) ease-in-out infinite}
+.bg-orbs i:nth-child(1){width:46vmax;height:46vmax;left:-12vmax;top:-14vmax;background:radial-gradient(circle,var(--a1),transparent 68%)}
+.bg-orbs i:nth-child(2){width:40vmax;height:40vmax;right:-10vmax;bottom:-12vmax;background:radial-gradient(circle,var(--a2),transparent 68%);animation-delay:-7s}
+.bg-orbs i:nth-child(3){width:30vmax;height:30vmax;left:40%;top:30%;background:radial-gradient(circle,color-mix(in srgb,var(--a1),var(--a2)),transparent 68%);opacity:.32;animation-delay:-13s}
+@keyframes orb{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(8vmax,6vmax) scale(1.15)}66%{transform:translate(-5vmax,9vmax) scale(.92)}}
+#main-app,#login-screen,#fy-screen{position:relative;z-index:1}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:linear-gradient(var(--a1),var(--a2));border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+/* glass surfaces */
+.card,.auth-container,.fy-card,.bank-stmt-card,.topbar,.status-bar,.modal,.picker-list,.autocomplete-list{background:var(--bg-secondary);backdrop-filter:blur(var(--blur)) saturate(170%);-webkit-backdrop-filter:blur(var(--blur)) saturate(170%);border:1px solid var(--glass-brd)}
+.card{border-radius:var(--radius);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .35s,box-shadow .35s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.22),0 0 0 1px color-mix(in srgb,var(--a1) 40%,transparent)}
+.topbar,.status-bar{border-left:0;border-right:0}.topbar{border-top:0}.status-bar{border-bottom:0}
+.modal{background:var(--modal-bg,var(--bg-secondary));border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.modal-overlay{background:rgba(5,8,25,.45);backdrop-filter:blur(6px)}
+.modal-overlay .modal{transform:translateY(24px) scale(.94);transition:transform .45s cubic-bezier(.2,1.2,.3,1)}
+.modal-overlay.open .modal{transform:none}
+.modal-header,.modal-footer{border-color:var(--border)}
+/* sidebar */
+.sidebar{background:var(--bg-sidebar);backdrop-filter:blur(var(--blur)) saturate(160%);border-right:1px solid var(--glass-brd);box-shadow:8px 0 40px rgba(0,0,0,.18)}
+.sidebar-header{background:linear-gradient(135deg,rgba(255,255,255,.08),transparent)}
+.sidebar-header span:first-child{display:inline-block;animation:bob calc(3.5s/var(--spd)) ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(-6deg)}}
+.nav-header,.nav-btn{transition:all .25s;position:relative}
+.nav-header:hover,.nav-btn:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--a1) 45%,transparent),transparent);transform:translateX(5px);color:#fff}
+.nav-btn::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:3px;background:var(--grad);transform:scaleY(0);transition:transform .25s}
+.nav-btn:hover::before{transform:scaleY(1)}
+.nav-items.open{animation:drop .35s ease both}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
+/* buttons */
+.btn{position:relative;overflow:hidden;border-radius:12px;font-family:var(--font-ui);transition:transform .2s,box-shadow .25s,filter .25s;background-image:linear-gradient(135deg,rgba(255,255,255,.22),transparent)}
+.btn::before{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);transition:left .6s}
+.btn:hover::before{left:130%}.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}.btn:active{transform:scale(.95)}
+.btn-primary{background-color:transparent;background-image:var(--grad);box-shadow:0 6px 20px color-mix(in srgb,var(--a1) 40%,transparent)}
+.btn-primary:hover{background-color:transparent;box-shadow:0 10px 28px color-mix(in srgb,var(--a1) 60%,transparent)}
+.btn-success{box-shadow:0 6px 18px rgba(40,167,69,.3)}.btn-danger{box-shadow:0 6px 18px rgba(220,53,69,.3)}
+.btn-ghost{background:var(--field);border:1px solid var(--glass-brd);color:var(--text-primary);backdrop-filter:blur(8px)}.btn-ghost:hover{background:var(--glass-hov,rgba(255,255,255,.18))}
+.input{background:var(--field);border:1px solid var(--glass-brd);border-radius:12px;color:var(--text-primary);transition:box-shadow .25s,border-color .25s,transform .2s}
+.input::placeholder{color:var(--text-secondary);opacity:.7}
+.input:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 4px color-mix(in srgb,var(--a1) 28%,transparent),0 0 22px color-mix(in srgb,var(--a2) 30%,transparent);transform:translateY(-1px)}
+select.input option{background:var(--modal-bg-solid,#1c2040);color:var(--text-primary)}
+/* tables */
+.data-table th{background:color-mix(in srgb,var(--a1) 78%,#000);backdrop-filter:blur(10px);letter-spacing:.2px}
+.data-table th:first-child{border-radius:10px 0 0 0}.data-table th:last-child{border-radius:0 10px 0 0}
+.data-table td{border-color:var(--border)}.data-table tr:nth-child(even){background:var(--field)}
+.data-table tr{transition:background .2s,transform .2s,box-shadow .2s}
+.data-table tr:hover{background:color-mix(in srgb,var(--a1) 22%,transparent);transform:scale(1.005);box-shadow:inset 3px 0 0 var(--a2)}
+.autocomplete-item:hover,.autocomplete-item.active,.picker-item:hover{background:var(--grad)}
+.picker-item{border-color:var(--border)}
+/* badges, tabs, FY cards */
+.fy-badge{background:var(--grad);box-shadow:0 4px 18px color-mix(in srgb,var(--a1) 45%,transparent);animation:pulse calc(3s/var(--spd)) ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 4px 30px color-mix(in srgb,var(--a2) 70%,transparent)}}
+.tabs{border-color:var(--border)}.tab{transition:all .3s;border-radius:10px 10px 0 0}.tab:hover{background:var(--field);color:var(--text-primary)}
+.tab.active{color:var(--text-primary);border-image:var(--grad) 1;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--a1) 18%,transparent))}
+.fy-card{border:1px solid var(--glass-brd);border-radius:18px;transition:transform .4s cubic-bezier(.2,1.2,.3,1),box-shadow .4s}
+.fy-card:hover{transform:translateY(-8px) scale(1.02);border-color:var(--a1);box-shadow:0 20px 50px rgba(0,0,0,.3),0 0 30px color-mix(in srgb,var(--a1) 40%,transparent)}
+.fy-card.active{background:linear-gradient(135deg,rgba(16,185,129,.25),var(--bg-secondary));border-color:#10b981}
+.fy-grid .fy-card{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.fy-grid .fy-card:nth-child(2){animation-delay:.08s}.fy-grid .fy-card:nth-child(3){animation-delay:.16s}.fy-grid .fy-card:nth-child(4){animation-delay:.24s}
+.bank-stmt-card{border-radius:14px}.month-chip{background:var(--field);border:1px solid var(--glass-brd);transition:all .2s}.month-chip:hover{transform:scale(1.1)}
+.month-chip.selected{background:var(--grad);border-color:transparent}
+.backup-banner{background:rgba(245,158,11,.18);color:var(--text-primary);backdrop-filter:blur(10px)}
+/* page entrance */
+#content-area>*{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+#content-area>*:nth-child(2){animation-delay:.07s}#content-area>*:nth-child(3){animation-delay:.14s}#content-area>*:nth-child(4){animation-delay:.21s}#content-area>*:nth-child(n+5){animation-delay:.28s}
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98);filter:blur(6px)}}
+/* splash + login */
+#splash-screen{background:linear-gradient(125deg,var(--bg1),var(--bg2),var(--bg3));z-index:9999}
+#splash-screen h1{font-size:3rem!important;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:bob calc(3s/var(--spd)) ease-in-out infinite;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--a1) 60%,transparent))}
+.progress-bar{background:rgba(255,255,255,.14);height:10px;border-radius:10px;box-shadow:inset 0 2px 6px rgba(0,0,0,.25)}
+.progress-fill{background:linear-gradient(90deg,var(--a1),var(--a2),var(--a1));background-size:200% 100%;animation:shim 1.2s linear infinite;box-shadow:0 0 18px var(--a2);border-radius:10px}
+@keyframes shim{to{background-position:-200% 0}}
+.auth-container{border-radius:26px;padding:2.4rem;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.3);animation:rise .9s cubic-bezier(.2,.8,.2,1) both,float calc(7s/var(--spd)) ease-in-out .9s infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.auth-container h2{font-size:1.9rem!important;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+#snake-canvas{border-color:var(--a2);box-shadow:0 0 30px color-mix(in srgb,var(--a2) 50%,transparent);border-radius:14px}
+/* toast */
+.toast{backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.3);border-radius:14px;animation:tin .55s cubic-bezier(.2,1.3,.3,1)}
+.toast.info{background:var(--grad)}
+@keyframes tin{from{transform:translateX(120%) scale(.9);opacity:0}}
+/* Theme Studio */
+#ts-overlay{position:fixed;inset:0;z-index:20000;background:rgba(5,8,25,.4);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity .35s}
+#ts-overlay.open{opacity:1;pointer-events:all}
+#ts-drawer{position:absolute;right:0;top:0;bottom:0;width:min(400px,100%);padding:1.4rem;overflow-y:auto;background:var(--modal-bg,var(--bg-secondary));backdrop-filter:blur(30px) saturate(180%);border-left:1px solid var(--glass-brd);box-shadow:-20px 0 60px rgba(0,0,0,.35);transform:translateX(105%);transition:transform .5s cubic-bezier(.2,1,.3,1);color:var(--text-primary)}
+#ts-overlay.open #ts-drawer{transform:none}
+#ts-drawer h3{font-size:1.25rem;margin-bottom:.2rem}#ts-drawer h4{margin:1.3rem 0 .6rem;font-size:.95rem;color:var(--text-secondary)}
+.ts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+.ts-sw{border:2px solid transparent;border-radius:14px;padding:0;cursor:pointer;overflow:hidden;background:var(--field);color:var(--text-primary);font:600 .82rem var(--font-ui);transition:transform .3s cubic-bezier(.2,1.4,.3,1),border-color .2s;text-align:left}
+.ts-sw:hover{transform:translateY(-4px) scale(1.04)}.ts-sw.on{border-color:var(--a2);box-shadow:0 0 18px color-mix(in srgb,var(--a2) 55%,transparent)}
+.ts-sw b{display:block;height:46px;background-size:200% 200%;animation:gflow calc(8s/var(--spd)) ease infinite}.ts-sw span{display:block;padding:.45rem .6rem}
+.ts-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.55rem 0;font-size:.88rem}
+.ts-row input[type=color]{width:46px;height:34px;border:1px solid var(--glass-brd);border-radius:10px;background:none;cursor:pointer;padding:2px}
+.ts-row input[type=range]{width:55%;accent-color:var(--a1)}
+.ts-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--a1)}
+html.no-anim *,html.no-anim *::before{animation:none!important;transition:none!important}
+html.no-orbs .bg-orbs{display:none}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style>
+<script id="glass-theme-engine">
+(function(){
+const THEMES={
+aurora:{n:'Aurora',a1:'#8b5cf6',a2:'#22d3ee',b:['#1e1b4b','#312e81','#0e7490'],d:1},
+ocean:{n:'Ocean',a1:'#0ea5e9',a2:'#6366f1',b:['#e0f2fe','#bae6fd','#c7d2fe'],d:0},
+sunset:{n:'Sunset',a1:'#f97316',a2:'#ec4899',b:['#fff1e6','#ffd6e0','#fde68a'],d:0},
+forest:{n:'Forest',a1:'#10b981',a2:'#84cc16',b:['#052e2b','#064e3b','#14532d'],d:1},
+rose:{n:'Rose',a1:'#f43f5e',a2:'#a855f7',b:['#fff1f5','#fbcfe8','#e9d5ff'],d:0},
+midnight:{n:'Midnight',a1:'#3b82f6',a2:'#8b5cf6',b:['#020617','#0f172a','#1e1b4b'],d:1},
+neon:{n:'Neon',a1:'#ff2bd6',a2:'#00f0ff',b:['#0b0220','#1a0638','#02112b'],d:1},
+gold:{n:'Royal Gold',a1:'#f59e0b',a2:'#ef4444',b:['#1c1208','#2b1b0a','#3a1410'],d:1},
+lavender:{n:'Lavender',a1:'#7c3aed',a2:'#ec4899',b:['#f5f3ff','#ede9fe','#fae8ff'],d:0},
+mint:{n:'Mint',a1:'#14b8a6',a2:'#3b82f6',b:['#ecfdf5','#ccfbf1','#dbeafe'],d:0}
+};
+const KEY='smartledger_glass_theme';
+let S={id:'aurora',c:{a1:'#ff6b6b',a2:'#feca57',b1:'#2d1b4e',b2:'#1b3a5c'},blur:18,spd:1,orbs:1,anim:1};
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const hex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const x=rgb(a),y=rgb(b);return hex(x.map((v,i)=>v*(1-t)+y[i]*t))};
+const lum=h=>{const[r,g,b]=rgb(h);return(.299*r+.587*g+.114*b)/255};
+function def(){
+ if(S.id==='custom'){const c=S.c;return{n:'Custom',a1:c.a1,a2:c.a2,b:[c.b1,mix(c.b1,c.b2,.5),c.b2],d:lum(c.b1)<.55?1:0}}
+ return THEMES[S.id]||THEMES.aurora;
+}
+function apply(){
+ const t=def(),r=document.documentElement.style,d=t.d,set=(k,v)=>r.setProperty(k,v);
+ set('--bg1',t.b[0]);set('--bg2',t.b[1]);set('--bg3',t.b[2]);set('--a1',t.a1);set('--a2',t.a2);
+ set('--accent',t.a1);set('--accent-hover',t.a2);set('--bg-primary',t.b[0]);
+ set('--bg-secondary',d?'rgba(255,255,255,.09)':'rgba(255,255,255,.58)');
+ set('--field',d?'rgba(255,255,255,.08)':'rgba(255,255,255,.7)');
+ set('--glass-brd',d?'rgba(255,255,255,.16)':'rgba(255,255,255,.75)');
+ set('--glass-hov',d?'rgba(255,255,255,.16)':'rgba(255,255,255,.95)');
+ set('--text-primary',d?'#f4f6ff':'#14213d');set('--text-secondary',d?'#aab4d6':'#4b587c');
+ set('--border',d?'rgba(255,255,255,.12)':'rgba(30,40,80,.12)');
+ set('--bg-sidebar','color-mix(in srgb,'+mix(t.a1,'#000000',d?.78:.62)+' 82%,transparent)');
+ set('--text-sidebar','#e6eaff');set('--radius','14px');
+ set('--shadow',d?'0 10px 34px rgba(0,0,0,.35)':'0 10px 34px rgba(60,70,120,.18)');
+ set('--modal-bg',d?mix(t.b[0],'#ffffff',.1):'#ffffff');set('--modal-bg-solid',d?mix(t.b[0],'#ffffff',.1):'#ffffff');
+ set('--blur',S.blur+'px');set('--spd',S.spd);
+ const h=document.documentElement;h.setAttribute('data-mode',d?'dark':'light');h.setAttribute('data-theme','');
+ h.classList.toggle('no-anim',!S.anim);h.classList.toggle('no-orbs',!S.orbs);
+}
+apply();
+function build(){
+ const o=document.createElement('div');o.className='bg-orbs';o.innerHTML='<i></i><i></i><i></i>';document.body.prepend(o);
+ const ov=document.createElement('div');ov.id='ts-overlay';
+ ov.innerHTML=`<aside id="ts-drawer"><div class="flex justify-between items-center"><div><h3>🎨 Theme Studio</h3><p style="font-size:.8rem;color:var(--text-secondary)">Theme निवडा किंवा स्वतःची बनवा</p></div><button class="btn btn-ghost btn-sm" id="ts-x">✖</button></div>
+ <h4>Ready themes</h4><div class="ts-grid" id="ts-grid"></div>
+ <h4>Custom theme</h4>
+ <div class="ts-row"><span>Accent 1</span><input type="color" id="c-a1"></div>
+ <div class="ts-row"><span>Accent 2</span><input type="color" id="c-a2"></div>
+ <div class="ts-row"><span>Background 1</span><input type="color" id="c-b1"></div>
+ <div class="ts-row"><span>Background 2</span><input type="color" id="c-b2"></div>
+ <button class="btn btn-primary w-full" id="c-go">✨ Use my custom theme</button>
+ <h4>Effects</h4>
+ <div class="ts-row"><span>Glass blur</span><input type="range" id="e-blur" min="0" max="40"></div>
+ <div class="ts-row"><span>Animation speed</span><input type="range" id="e-spd" min="0.4" max="2" step="0.1"></div>
+ <div class="ts-row"><span>Floating glow orbs</span><input type="checkbox" id="e-orbs"></div>
+ <div class="ts-row"><span>Animations</span><input type="checkbox" id="e-anim"></div>
+ <button class="btn btn-ghost w-full mt-4" id="e-reset">↺ Reset</button></aside>`;
+ document.body.appendChild(ov);
+ const g=ov.querySelector('#ts-grid');
+ const sync=()=>{
+  g.innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="ts-sw ${S.id===k?'on':''}" data-k="${k}"><b style="background-image:linear-gradient(135deg,${t.b[0]},${t.a1},${t.a2},${t.b[2]})"></b><span>${t.n}</span></button>`).join('');
+  const q=i=>ov.querySelector(i);q('#c-a1').value=S.c.a1;q('#c-a2').value=S.c.a2;q('#c-b1').value=S.c.b1;q('#c-b2').value=S.c.b2;
+  q('#e-blur').value=S.blur;q('#e-spd').value=S.spd;q('#e-orbs').checked=!!S.orbs;q('#e-anim').checked=!!S.anim;
+ };
+ const q=i=>ov.querySelector(i);
+ g.onclick=e=>{const b=e.target.closest('.ts-sw');if(!b)return;S.id=b.dataset.k;apply();save();sync()};
+ ['a1','a2','b1','b2'].forEach(k=>q('#c-'+k).oninput=e=>{S.c[k]=e.target.value;S.id='custom';apply();save();g.querySelectorAll('.on').forEach(x=>x.classList.remove('on'))});
+ q('#c-go').onclick=()=>{S.id='custom';apply();save();sync();try{Utils.toast('Custom theme लागू झाली ✨','success')}catch(e){}};
+ q('#e-blur').oninput=e=>{S.blur=+e.target.value;apply();save()};
+ q('#e-spd').oninput=e=>{S.spd=+e.target.value;apply();save()};
+ q('#e-orbs').onchange=e=>{S.orbs=e.target.checked?1:0;apply();save()};
+ q('#e-anim').onchange=e=>{S.anim=e.target.checked?1:0;apply();save()};
+ q('#e-reset').onclick=()=>{S={id:'aurora',c:S.c,blur:18,spd:1,orbs:1,anim:1};apply();save();sync()};
+ const close=()=>ov.classList.remove('open');
+ q('#ts-x').onclick=close;ov.addEventListener('click',e=>{if(e.target===ov)close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+ window.ThemeStudio={toggle(){sync();ov.classList.toggle('open')}};
+ try{App.UI.toggleTheme=()=>window.ThemeStudio.toggle()}catch(e){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script id="supabase-layer">
+/* Supabase layer: replaces Dexie with the same API (subset the app uses). */
+const SUPABASE_URL = 'https://gjemtejlfaitvaxrdoey.supabase.co';        // e.g. https://abcdxyz.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqZW10ZWpsZmFpdHZheHJkb2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5Mjk1MzQsImV4cCI6MjEwODUwNTUzNH0.MxUGNE3BC-cZrIkqQS_WiVmffMvqyIhEqCH9cgb6j6I'; // "anon public" key (never the service_role key!)
+(function(){
+const missing=/PASTE_YOUR/.test(SUPABASE_URL+SUPABASE_ANON_KEY)||typeof supabase==='undefined';
+if(missing){
+ document.addEventListener('DOMContentLoaded',()=>{document.body.innerHTML='<div style="font-family:sans-serif;max-width:560px;margin:12vh auto;padding:2rem;background:#fff3cd;border-radius:12px;color:#333"><h2>⚙️ Supabase setup बाकी आहे</h2><p style="margin-top:1rem">index.html च्या सुरुवातीला <b>SUPABASE_URL</b> आणि <b>SUPABASE_ANON_KEY</b> टाका (Supabase → Project Settings → API). इंटरनेट चालू असावे.</p></div>'});
+ window.SBDB={open:()=>Promise.resolve()};return;
+}
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+window.SB=sb;
+const COLS={
+ financialYears:['id','label','startDate','endDate','isActive','isLocked','lastOpened'],
+ customers:['id','fyId','customerName','firmName','contactNo','panCardNo','gstNo','aadharNo','city','dob','addedBy','address','createdAt','originCustomerId'],
+ bankAccounts:['id','fyId','customerId','bankName','accountNo','ifscCode','expectedFrom','expectedTo','isClosed','closedReason'],
+ statementRecords:['id','fyId','customerId','bankAccountId','fromDate','toDate','receivedOn','receivedBy','mode','remarks','createdAt','custCount'],
+ editHistory:['id','fyId','customerId','changedBy','changedAt','fieldName','oldValue','newValue'],
+ customerNotes:['id','fyId','customerId','noteText','addedBy','addedAt'],
+ activityLog:['id','username','action','loggedAt'],
+ searchHistory:['id','searchedBy','searchQuery','resultName','searchedAt'],
+ settings:['key','value'],
+ users:['id','username','role','hint']
+};
+const chk=({data,error})=>{if(error)throw new Error(error.message);return data};
+const pick=(name,o)=>{const ok=COLS[name],r={};for(const k in o){if(o[k]===undefined)continue;if(ok.includes(k))r[k]=o[k];else console.warn('Ignored unknown field',name,k)}return r};
+const chunks=(a,n)=>{const r=[];for(let i=0;i<a.length;i+=n)r.push(a.slice(i,i+n));return r};
+const cmp=(a,b)=>a<b?-1:a>b?1:0;
+class Col{
+ constructor(t,f=[],p=[],ord=null,rev=false){this.t=t;this.f=f;this.p=p;this.ord=ord;this.rev=rev}
+ _c(o){return Object.assign(new Col(this.t,this.f,this.p,this.ord,this.rev),o)}
+ and(fn){return this._c({p:[...this.p,fn]})} filter(fn){return this.and(fn)}
+ reverse(){return this._c({rev:!this.rev})}
+ async _page(filters){
+  const t=this.t,out=[],step=1000;let from=0;
+  for(;;){
+   let q=sb.from(t.tbl).select('*');
+   for(const [k,op,v] of filters)q=op==='in'?q.in(k,v):q.eq(k,v);
+   if(this.ord&&this.ord!==t.pk)q=q.order(this.ord,{ascending:true});
+   q=q.order(t.pk,{ascending:true}).range(from,from+step-1);
+   const rows=chk(await q);out.push(...rows);
+   if(rows.length<step)break;from+=step;
+  }
+  return out;
+ }
+ async _rows(){
+  const t=this.t,inF=this.f.find(x=>x[1]==='in');let rows;
+  if(inF&&inF[2].length>150){
+   const rest=this.f.filter(x=>x!==inF);rows=[];
+   for(const part of chunks(inF[2],150))rows.push(...await this._page([...rest,[inF[0],'in',part]]));
+   rows.sort((a,b)=>cmp(this.ord?a[this.ord]:a[t.pk],this.ord?b[this.ord]:b[t.pk]));
+  }else rows=await this._page(this.f);
+  if(this.p.length)rows=rows.filter(r=>this.p.every(fn=>fn(r)));
+  return rows;
+ }
+ async toArray(){const r=await this._rows();return this.rev?r.reverse():r}
+ async first(){const r=await this.toArray();return r[0]}
+ async count(){return(await this._rows()).length}
+ async sortBy(field){const r=(await this._rows()).sort((a,b)=>cmp(a[field],b[field]));return this.rev?r.reverse():r}
+ async delete(){
+  const t=this.t,ids=(await this._rows()).map(r=>r[t.pk]);
+  for(const part of chunks(ids,150))chk(await sb.from(t.tbl).delete().in(t.pk,part));
+  return ids.length;
+ }
+ async modify(ch){
+  const t=this.t,rows=await this._rows();
+  if(typeof ch==='function'){
+   for(const r of rows){const copy={...r};ch(copy);const d=pick(t.name,copy);delete d[t.pk];chk(await sb.from(t.tbl).update(d).eq(t.pk,r[t.pk]))}
+  }else{
+   const d=pick(t.name,ch);
+   for(const part of chunks(rows.map(r=>r[t.pk]),150))chk(await sb.from(t.tbl).update(d).in(t.pk,part));
+  }
+  return rows.length;
+ }
+}
+class Tbl{
+ constructor(name,tbl,pk='id'){this.name=name;this.tbl=tbl;this.pk=pk}
+ where(f){return{equals:v=>new Col(this,[[f,'eq',v]]),anyOf:a=>new Col(this,[[f,'in',[...a]]])}}
+ orderBy(f){return new Col(this,[],[],f)} reverse(){return new Col(this,[],[],null,true)}
+ toArray(){return new Col(this).toArray()}
+ async add(o){const d=chk(await sb.from(this.tbl).insert(pick(this.name,o)).select(this.pk).single());return d[this.pk]}
+ async get(k){const d=chk(await sb.from(this.tbl).select('*').eq(this.pk,k).maybeSingle());return d||undefined}
+ async put(o){o=pick(this.name,o);chk(await sb.from(this.tbl).upsert(o));return o[this.pk]}
+ async update(k,ch){chk(await sb.from(this.tbl).update(pick(this.name,ch)).eq(this.pk,k));return 1}
+ async delete(k){chk(await sb.from(this.tbl).delete().eq(this.pk,k))}
+ async clear(){chk(await sb.from(this.tbl).delete().not(this.pk,'is',null))}
+ async bulkAdd(arr){
+  for(const part of chunks(arr.map(o=>pick(this.name,o)),500))chk(await sb.from(this.tbl).insert(part));
+  if(this.pk==='id')chk(await sb.rpc('reset_sequences'));
+ }
+}
+const db={
+ financialYears:new Tbl('financialYears','financial_years'),customers:new Tbl('customers','customers'),
+ bankAccounts:new Tbl('bankAccounts','bank_accounts'),statementRecords:new Tbl('statementRecords','statement_records'),
+ editHistory:new Tbl('editHistory','edit_history'),customerNotes:new Tbl('customerNotes','customer_notes'),
+ activityLog:new Tbl('activityLog','activity_log'),searchHistory:new Tbl('searchHistory','search_history'),
+ settings:new Tbl('settings','app_settings','key'),users:new Tbl('users','profiles'),
+ open:()=>Promise.resolve(),
+ transaction:(...a)=>Promise.resolve(a[a.length-1]())   // no real atomicity over the network
+};
+/* Accounts are managed by Supabase Auth: a backup/restore must never wipe or recreate them. */
+db.users.clear=async()=>{};db.users.bulkAdd=async()=>{};
+db.users.add=async()=>{throw new Error('User Supabase Dashboard मधून बनवा')};
+window.SBDB=db;
+})();
+</script>
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="splash-screen">
+    <h1 style="font-size: 2.5rem; color: var(--accent); margin-bottom: 0.5rem;">📒 SMART LEDGER</h1>
+    <p style="font-size: 1.2rem; color: var(--text-secondary);">made by Lucky Dahivadkar</p>
+    <p style="font-size: 1rem; color: var(--text-secondary); margin-top: 0.5rem;">Professional Customer Management System</p>
+    <div class="progress-bar"><div class="progress-fill" id="splash-progress"></div></div>
+    <p id="splash-text" style="margin-top: 1rem; color: var(--text-secondary);">Loading... 0%</p>
+</div>
+<div id="login-screen" class="hidden h-full flex items-center justify-center">
+    <div class="auth-container">
+        <h2 class="text-center font-bold mb-4" style="font-size: 1.5rem; color: var(--accent);">SMART LEDGER</h2>
+        <p class="text-center marathi mb-4" style="color: var(--text-secondary);">कृपया लॉगिन करा</p>
+        <form id="login-form">
+            <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem; font-weight:500;">Username</label><input type="text" id="login-username" class="input" required autocomplete="off"></div>
+            <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem; font-weight:500;">Password</label><input type="password" id="login-password" class="input" required></div>
+            <button type="submit" class="btn btn-primary w-full mb-4">🔐 Login</button>
+            <button type="button" class="btn btn-ghost w-full marathi" onclick="App.Auth.showForgotPassword()">Forgot Password?</button>
+        </form>
+    </div>
+</div>
+<div id="forgot-pw-modal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header"><h3 class="marathi">Forgot Password</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('forgot-pw-modal')">✖</button></div>
+        <div class="modal-body">
+            <input type="text" id="fp-username" class="input mb-4" placeholder="Username">
+            <button class="btn btn-primary mb-4" onclick="App.Auth.showHint()">Show Hint</button>
+            <p id="fp-hint" class="marathi mb-4" style="color: var(--accent); font-style: italic;"></p>
+            <input type="password" id="fp-new-pw" class="input mb-4" placeholder="New Password (min 4 chars)">
+            <button class="btn btn-success w-full" onclick="App.Auth.resetPassword()">Reset Password</button>
+        </div>
+    </div>
+</div>
+<div id="fy-screen" class="hidden h-full flex flex-col p-6" style="overflow-y: auto;">
+    <div class="flex justify-between items-center mb-4">
+        <div><h2 class="font-bold" style="font-size: 1.5rem; color: var(--accent);">Select Financial Year</h2><p class="marathi" style="color: var(--text-secondary);">आर्थिक वर्ष निवडा किंवा व्यवस्थापित करा</p></div>
+        <button class="btn btn-ghost" onclick="App.Auth.logout()">Logout</button>
+    </div>
+    <div class="fy-grid" id="fy-list"></div>
+    <div class="card mt-4" style="max-width: 400px; margin-top: 2rem;">
+        <h3 class="font-bold mb-4 marathi">नवीन Financial Year बनवा / Copy करा</h3>
+        <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem;">Start Year (e.g., 2025)</label><input type="number" id="new-fy-year" class="input" value="2025" min="2020" max="2050"></div>
+        <div class="mb-4 flex flex-col gap-2">
+            <label class="flex items-center gap-2 marathi"><input type="checkbox" id="copy-prev-fy"> Copy customers from previous FY</label>
+            <select id="copy-source-fy" class="input hidden"><option value="">Select Source FY</option></select>
+            <div id="copy-options" class="hidden flex flex-col gap-2 ml-6 marathi" style="font-size: 0.9rem;">
+                <label class="flex items-center gap-2"><input type="checkbox" id="copy-notes"> Copy Diary Notes</label>
+                <label class="flex items-center gap-2"><input type="checkbox" id="copy-statements"> Copy Statement Records</label>
+            </div>
+        </div>
+        <button class="btn btn-primary w-full" onclick="App.FY.create()">Create New FY</button>
+    </div>
+</div>
+<div id="main-app" class="hidden">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header flex items-center gap-2"><span style="font-size: 1.5rem;">📒</span><span class="font-bold sidebar-text">SMART LEDGER</span></div>
+        <nav id="sidebar-nav" style="flex:1; overflow-y: auto; padding: 0.5rem;"></nav>
+        <div class="sidebar-footer"><p>made by Lucky Dahivadkar</p><button class="btn btn-ghost" style="font-size: 0.8rem; margin-top: 0.5rem;" onclick="App.Auth.logout()">🚪 Logout</button></div>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="flex items-center gap-4">
+                <button class="btn btn-ghost" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">☰</button>
+                <span id="topbar-user" class="font-bold"></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="fy-badge"><span id="topbar-fy-label">FY 2025-26</span><button class="btn btn-ghost" style="color: white; padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="App.FY.showSelection()">Switch FY</button></div>
+                <button class="btn btn-ghost" onclick="App.UI.toggleTheme()">🎨 Theme</button>
+            </div>
+        </header>
+        <div id="content-area" class="content-area"></div>
+        <footer class="status-bar"><span id="status-text">Ready</span></footer>
+    </main>
+</div>
+<div id="generic-modal" class="modal-overlay">
+    <div class="modal" id="generic-modal-content"></div>
+</div>
+<script>
+// ==========================================
+// 1. DATABASE SETUP
+// ==========================================
+const db = window.SBDB; // Supabase (see supabase-layer script in <head>)
+
+// ==========================================
+// 2. STATE & UTILITIES
+// ==========================================
+const State = { currentUser: null, currentFY: null, theme: 'Default' };
+const Utils = {
+    async hashPassword(password) {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+    formatDate(dateStr) {
+        if (!dateStr) return '—';
+        if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) return dateStr;
+        const d = new Date(dateStr);
+        return isNaN(d) ? dateStr : `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+    },
+    parseDate(str) {
+        if (!str) return null;
+        if (/^\d{2}-\d{2}-\d{4}$/.test(str)) { const [d,m,y] = str.split('-'); return new Date(+y, +m-1, +d); }
+        const d = new Date(str);
+        return isNaN(d) ? null : d;
+    },
+    toISO(str) {
+        const d = this.parseDate(str);
+        return d ? d.toISOString().slice(0,10) : '';
+    },
+    todayStr() { const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; },
+    nowStr() { const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; },
+    toast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const el = document.createElement('div'); el.className = `toast ${type}`; el.textContent = message;
+        container.appendChild(el); setTimeout(() => el.remove(), 4000);
+    },
+    setStatus(msg) { document.getElementById('status-text').textContent = msg; setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 4000); },
+    confirmDialog(title, message, onConfirm) {
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>${title}</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body"><p class="marathi">${message}</p></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button>
+                <button class="btn btn-danger" id="confirm-action-btn">Confirm</button>
+            </div>`;
+        App.UI.openModal('generic-modal');
+        document.getElementById('confirm-action-btn').onclick = () => { App.UI.closeModal('generic-modal'); onConfirm(); };
+    },
+    normalizePhone(contact) {
+        let digits = (contact || '').replace(/[^0-9]/g, '');
+        if (digits.startsWith('91') && digits.length === 12) digits = digits.slice(2);
+        return digits;
+    },
+    fyMonths() { return ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar']; }
+};
+
+// ==========================================
+// 3. AUTHENTICATION
+// ==========================================
+const Auth = {
+    async init() {
+        if (!await db.users.where('username').equals('ADMIN').first()) {
+            await db.users.add({ username: 'ADMIN', passwordHash: await Utils.hashPassword('1980'), role: 'admin', hint: 'Default password' });
+        }
+    },
+    async login(username, password) {
+        const hash = await Utils.hashPassword(password);
+        const user = await db.users.where('username').equals(username.toUpperCase()).and(u => u.passwordHash === hash).first();
+        if (user) {
+            State.currentUser = user;
+            await db.activityLog.add({ username: user.username, action: 'LOGIN', loggedAt: Utils.nowStr() });
+            Utils.toast(`Welcome, ${user.username}!`, 'success');
+            App.FY.showSelection();
+            return true;
+        }
+        Utils.toast('Invalid Username or Password!', 'error');
+        return false;
+    },
+    async showHint() {
+        const uname = document.getElementById('fp-username').value.trim().toUpperCase();
+        const user = await db.users.where('username').equals(uname).first();
+        const hintEl = document.getElementById('fp-hint');
+        hintEl.textContent = user ? `Hint: ${user.hint || 'No hint set'}` : 'User सापडला नाही.';
+        hintEl.style.color = user ? 'var(--accent)' : 'var(--danger)';
+    },
+    async resetPassword() {
+        const uname = document.getElementById('fp-username').value.trim().toUpperCase();
+        const newPw = document.getElementById('fp-new-pw').value.trim();
+        if (!uname || newPw.length < 4) return Utils.toast('Password कमीत कमी 4 characters असावे.', 'error');
+        await db.users.where('username').equals(uname).modify({ passwordHash: await Utils.hashPassword(newPw) });
+        Utils.toast('Password reset झाला!', 'success');
+        App.UI.closeModal('forgot-pw-modal');
+    },
+    showForgotPassword() {
+        document.getElementById('fp-username').value = ''; document.getElementById('fp-new-pw').value = ''; document.getElementById('fp-hint').textContent = '';
+        App.UI.openModal('forgot-pw-modal');
+    },
+    async logout() {
+        if (State.currentUser) await db.activityLog.add({ username: State.currentUser.username, action: 'LOGOUT', loggedAt: Utils.nowStr() });
+        State.currentUser = null; State.currentFY = null;
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('fy-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+    }
+};
+
+// ==========================================
+// 4. FINANCIAL YEAR
+// ==========================================
+const FY = {
+    async showSelection() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('fy-screen').classList.remove('hidden');
+        await this.renderList();
+    },
+    async renderList() {
+        const fys = await db.financialYears.orderBy('lastOpened').reverse().toArray();
+        const container = document.getElementById('fy-list');
+        container.innerHTML = '';
+        const sourceSelect = document.getElementById('copy-source-fy');
+        sourceSelect.innerHTML = '<option value="">Select Source FY</option>';
+        for (const fy of fys) {
+            const custCount = await db.customers.where('fyId').equals(fy.id).count();
+            sourceSelect.innerHTML += `<option value="${fy.id}">${fy.label}</option>`;
+            const div = document.createElement('div');
+            div.className = `fy-card ${fy.isActive ? 'active' : ''} ${fy.isLocked ? 'locked' : ''}`;
+            let actionsHtml = '';
+            if (State.currentUser?.role === 'admin') {
+                actionsHtml = `<div class="fy-actions" onclick="event.stopPropagation()">
+                    <button class="btn btn-sm btn-ghost" onclick="App.FY.edit(${fy.id})" title="Edit">✏️</button>
+                    <button class="btn btn-sm btn-ghost" onclick="App.FY.toggleLock(${fy.id})" title="Lock/Unlock">${fy.isLocked ? '🔓' : '🔒'}</button>
+                    <button class="btn btn-sm btn-danger" onclick="App.FY.delete(${fy.id}, '${fy.label}')" title="Delete">🗑</button>
+                </div>`;
+            }
+            div.innerHTML = `${actionsHtml}
+                <h3 class="font-bold" style="font-size: 1.2rem; color: var(--accent);">${fy.label}</h3>
+                <p class="marathi" style="color: var(--text-secondary); margin: 0.5rem 0;">${fy.startDate} to ${fy.endDate}</p>
+                <div class="flex justify-between items-center mt-4" style="font-size: 0.9rem;">
+                    <span>👥 ${custCount} Customers</span>
+                    <span>${fy.isLocked ? '🔒 Locked' : '✅ Active'}</span>
+                </div>`;
+            div.onclick = () => this.select(fy.id);
+            container.appendChild(div);
+        }
+        document.getElementById('copy-prev-fy').onchange = (e) => {
+            document.getElementById('copy-source-fy').classList.toggle('hidden', !e.target.checked);
+            document.getElementById('copy-options').classList.toggle('hidden', !e.target.checked);
+        };
+    },
+    async create() {
+        const year = parseInt(document.getElementById('new-fy-year').value);
+        if (!year) return Utils.toast('Valid year टाका.', 'error');
+        const label = `FY ${year}-${String(year+1).slice(-2)}`;
+        if (await db.financialYears.where('label').equals(label).first()) return Utils.toast('हे Financial Year आधीच आहे!', 'error');
+        const newFyId = await db.financialYears.add({
+            label, startDate: `01-04-${year}`, endDate: `31-03-${year+1}`, isActive: true, isLocked: false, lastOpened: Date.now()
+        });
+        if (document.getElementById('copy-prev-fy').checked) {
+            const sourceId = parseInt(document.getElementById('copy-source-fy').value);
+            if (!sourceId) return Utils.toast('Source FY निवडा.', 'error');
+            await this.copyData(sourceId, newFyId);
+        }
+        Utils.toast(`${label} created successfully!`, 'success');
+        this.select(newFyId);
+    },
+    async copyData(sourceFyId, targetFyId) {
+        Utils.toast('Copying data... कृपया थांबा.', 'info');
+        const customers = await db.customers.where('fyId').equals(sourceFyId).toArray();
+        let custCount = 0, bankCount = 0, noteCount = 0, stmtCount = 0;
+        const copyNotes = document.getElementById('copy-notes').checked;
+        const copyStmts = document.getElementById('copy-statements').checked;
+        await db.transaction('rw', db.customers, db.bankAccounts, db.customerNotes, db.statementRecords, async () => {
+            for (const cust of customers) {
+                const oldId = cust.id;
+                delete cust.id; delete cust.fyId;
+                cust.fyId = targetFyId; cust.originCustomerId = oldId; cust.createdAt = Utils.todayStr();
+                const newId = await db.customers.add(cust); custCount++;
+                const banks = await db.bankAccounts.where('customerId').equals(oldId).toArray();
+                for (const b of banks) {
+                    delete b.id; b.fyId = targetFyId; b.customerId = newId;
+                    await db.bankAccounts.add(b); bankCount++;
+                }
+                if (copyNotes) {
+                    const notes = await db.customerNotes.where('customerId').equals(oldId).toArray();
+                    for (const n of notes) { delete n.id; n.fyId = targetFyId; n.customerId = newId; await db.customerNotes.add(n); noteCount++; }
+                }
+                if (copyStmts) {
+                    const stmts = await db.statementRecords.where('customerId').equals(oldId).toArray();
+                    for (const s of stmts) { delete s.id; s.fyId = targetFyId; s.customerId = newId; await db.statementRecords.add(s); stmtCount++; }
+                }
+            }
+        });
+        Utils.toast(`✅ Copied: ${custCount} Customers, ${bankCount} Banks, ${noteCount} Notes, ${stmtCount} Statements`, 'success');
+    },
+    async edit(fyId) {
+        const fy = await db.financialYears.get(fyId);
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>Edit Financial Year</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body">
+                <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem;">Label</label><input type="text" id="edit-fy-label" class="input" value="${fy.label}"></div>
+                <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem;">Start Date (DD-MM-YYYY)</label><input type="text" id="edit-fy-start" class="input" value="${fy.startDate}"></div>
+                <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem;">End Date (DD-MM-YYYY)</label><input type="text" id="edit-fy-end" class="input" value="${fy.endDate}"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-primary" onclick="App.FY.saveEdit(${fyId})">Save Changes</button></div>`;
+        App.UI.openModal('generic-modal');
+    },
+    async saveEdit(fyId) {
+        const label = document.getElementById('edit-fy-label').value.trim();
+        const start = document.getElementById('edit-fy-start').value.trim();
+        const end = document.getElementById('edit-fy-end').value.trim();
+        if (!label || !start || !end) return Utils.toast('All fields are required.', 'error');
+        await db.financialYears.update(fyId, { label, startDate: start, endDate: end });
+        Utils.toast('Financial Year updated!', 'success');
+        App.UI.closeModal('generic-modal');
+        this.renderList();
+        if (State.currentFY?.id === fyId) {
+            State.currentFY = await db.financialYears.get(fyId);
+            document.getElementById('topbar-fy-label').textContent = State.currentFY.label;
+        }
+    },
+    async toggleLock(fyId) {
+        const fy = await db.financialYears.get(fyId);
+        await db.financialYears.update(fyId, { isLocked: !fy.isLocked });
+        Utils.toast(fy.isLocked ? 'FY Unlocked' : 'FY Locked', 'info');
+        this.renderList();
+    },
+    async delete(fyId, label) {
+        const confirmText = prompt(`Type "${label}" to confirm deletion of this Financial Year and ALL its data.`);
+        if (confirmText !== label) return Utils.toast('Deletion cancelled or incorrect label.', 'error');
+        await db.transaction('rw', db.financialYears, db.customers, db.bankAccounts, db.customerNotes, db.statementRecords, db.editHistory, async () => {
+            const custs = await db.customers.where('fyId').equals(fyId).toArray();
+            for (const c of custs) {
+                await db.bankAccounts.where('customerId').equals(c.id).delete();
+                await db.customerNotes.where('customerId').equals(c.id).delete();
+                await db.statementRecords.where('customerId').equals(c.id).delete();
+                await db.editHistory.where('customerId').equals(c.id).delete();
+            }
+            await db.customers.where('fyId').equals(fyId).delete();
+            await db.financialYears.delete(fyId);
+        });
+        Utils.toast('Financial Year and all associated data deleted.', 'success');
+        this.renderList();
+    },
+    async select(fyId) {
+        const fy = await db.financialYears.get(fyId);
+        if (fy.isLocked && State.currentUser?.role !== 'admin') return Utils.toast('हे Financial Year Locked आहे.', 'error');
+        await db.financialYears.where('id').notEqual(fyId).modify({ isActive: false });
+        await db.financialYears.update(fyId, { isActive: true, lastOpened: Date.now() });
+        State.currentFY = fy;
+        document.getElementById('fy-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('topbar-fy-label').textContent = fy.label;
+        document.getElementById('topbar-user').textContent = `👤 ${State.currentUser.username}`;
+        App.UI.renderSidebar();
+        App.Dashboard.render();
+        App.Backup.checkReminder();
+    }
+};
+
+// ==========================================
+// 5. UI & NAVIGATION
+// ==========================================
+const UI = {
+    openModal(id) { document.getElementById(id).classList.add('open'); },
+    closeModal(id) { document.getElementById(id).classList.remove('open'); },
+    toggleTheme() {
+        const themes = ['Default', 'Blue', 'Green', 'Pink', 'Dark'];
+        State.theme = themes[(themes.indexOf(State.theme) + 1) % themes.length];
+        document.documentElement.setAttribute('data-theme', State.theme === 'Default' ? '' : State.theme);
+        Utils.toast(`Theme: ${State.theme}`, 'info');
+    },
+    renderSidebar() {
+        const nav = document.getElementById('sidebar-nav');
+        const isAdmin = State.currentUser?.role === 'admin';
+        const groups = [
+            { label: '📊 Dashboard', action: 'App.Dashboard.render()' },
+            { label: '👥 Customers', items: [
+                { label: '➕ Add Customer', action: 'App.Customers.renderAdd()' },
+                { label: '👥 View Customers', action: 'App.Customers.renderView()' },
+                { label: '✏️ Edit Customer', action: 'App.Customers.renderSearchForEdit()' },
+                { label: '🗑 Delete Customer', action: 'App.Customers.renderSearchForDelete()' },
+                { label: '📓 Customer Diary', action: 'App.Diary.render()' }
+            ]},
+            { label: '🔍 Search & Filter', items: [
+                { label: '🔍 Search Customer', action: 'App.Customers.renderSearch()' },
+                { label: '🔎 Advanced Search', action: 'App.Customers.renderAdvancedSearch()' },
+                { label: '🏦 Bank Filter', action: 'App.BankFilter.render()' },
+                { label: '📋 Document Request', action: 'App.DocRequest.render()' }
+            ]},
+            { label: '🖨 Print', items: [
+                { label: '🖨 Print by ID', action: 'App.Print.renderById()' },
+                { label: '🖨 Bulk Print', action: 'App.Print.renderBulk()' }
+            ]},
+            { label: '📋 Reports & Reminders', items: [
+                { label: '🎂 Birthday Reminder', action: 'App.Birthday.render()' },
+                { label: '🏦 Bank Report', action: 'App.BankReport.render()' },
+                { label: '📋 Edit History', action: 'App.EditHistory.render()' },
+                { label: '🔍 Search History', action: 'App.SearchHistory.render()' },
+                { label: '📊 Activity Log', action: 'App.ActivityLog.render()' },
+                { label: '🎉 Greetings', action: 'App.Greetings.render()' }
+            ]},
+            { label: '💾 Data Management', items: [
+                { label: '📤 Export to Excel', action: 'App.Data.exportExcel()' },
+                { label: '📥 Import from Excel', action: 'App.Data.importExcel()' },
+                { label: '🏦 Import Bank Accounts', action: 'App.Data.importBankAccounts()' },
+                { label: '📋 Download Template', action: 'App.Data.downloadTemplate()' },
+                { label: '💾 Backup Now', action: 'App.Backup.backupNow()' },
+                { label: '📂 Restore Backup', action: 'App.Backup.restoreBackup()' },
+                { label: '🗓 Fix Old Dates', action: 'App.Data.fixOldDates()' }
+            ]},
+            { label: '⚙️ Settings', items: [
+                { label: '🔒 Change Password', action: 'App.Settings.renderChangePassword()' },
+                ...(isAdmin ? [{ label: '👤 Users', action: 'App.Settings.renderCreateUser()' }] : [])
+            ]}
+        ];
+        nav.innerHTML = groups.map(g => {
+            if (g.action) return `<button class="nav-btn" onclick="${g.action}"><span>${g.label}</span></button>`;
+            return `<div class="nav-group"><div class="nav-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.arrow').textContent = this.nextElementSibling.classList.contains('open') ? '▼' : '▶'"><span class="arrow">▶</span> <span>${g.label}</span></div><div class="nav-items">${g.items.map(i => `<button class="nav-btn marathi" onclick="${i.action}"><span>${i.label}</span></button>`).join('')}</div></div>`;
+        }).join('');
+    }
+};
+
+// ==========================================
+// 6. CUSTOMERS MODULE
+// ==========================================
+const Customers = {
+    async renderAdd() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4" style="color: var(--accent);">➕ Add New Customer</h2>
+                <form id="add-customer-form" class="flex flex-col gap-4">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Customer Name *</label><input type="text" name="customerName" class="input" required></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Firm Name</label><input type="text" name="firmName" class="input"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Contact No</label><input type="text" name="contactNo" class="input"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">PAN Card No</label><input type="text" name="panCardNo" class="input" style="text-transform:uppercase;"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">GST No</label><input type="text" name="gstNo" class="input" style="text-transform:uppercase;"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Aadhar No</label><input type="text" name="aadharNo" class="input"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">City</label><input type="text" name="city" class="input"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Date of Birth (DD-MM-YYYY)</label><input type="text" name="dob" class="input" placeholder="01-01-1980"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Added By</label><input type="text" name="addedBy" class="input" value="${State.currentUser.username}" readonly></div>
+                    </div>
+                    <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Address</label><textarea name="address" class="input" rows="2"></textarea></div>
+                    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--bg-primary);">
+                        <h4 class="font-bold mb-2 marathi">🏦 Bank Accounts</h4>
+                        <div id="bank-rows-container"></div>
+                        <button type="button" class="btn btn-primary mt-4" style="font-size:0.9rem;" onclick="App.Customers.addBankRow()">➕ Add Bank Account</button>
+                    </div>
+                    <div class="flex gap-4 mt-4">
+                        <button type="submit" class="btn btn-success">💾 Save Customer</button>
+                        <button type="button" class="btn btn-ghost" onclick="App.Customers.renderAdd()">🗑 Clear</button>
+                    </div>
+                </form>
+            </div>`;
+        this.addBankRow();
+        document.getElementById('add-customer-form').onsubmit = (e) => this.save(e);
+    },
+    addBankRow(bank = '', acc = '', ifsc = '') {
+        const container = document.getElementById('bank-rows-container');
+        const idx = container.children.length + 1;
+        const div = document.createElement('div'); div.className = 'bank-row';
+        div.innerHTML = `
+            <span style="font-weight:bold; width: 20px;">${idx}.</span>
+            <div class="autocomplete-wrapper">
+                <input type="text" class="input bank-name" placeholder="Bank Name" value="${bank}" oninput="App.Customers.handleBankAutocomplete(this)" onkeydown="App.Customers.handleBankKeydown(event, this)">
+                <div class="autocomplete-list hidden"></div>
+            </div>
+            <input type="text" class="input" placeholder="A/C No" value="${acc}" style="flex:1;">
+            <input type="text" class="input" placeholder="IFSC" value="${ifsc}" style="width: 120px;">
+            <button type="button" class="btn btn-danger" style="padding: 0.4rem 0.8rem;" onclick="this.parentElement.remove()">✖</button>`;
+        container.appendChild(div);
+    },
+    async handleBankAutocomplete(input) {
+        const val = input.value.toLowerCase();
+        const list = input.nextElementSibling;
+        if (val.length < 1) { list.classList.add('hidden'); return; }
+        const banks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        const unique = [...new Set(banks.map(b => b.bankName).filter(n => n && n.toLowerCase().includes(val)))].slice(0, 5);
+        if (unique.length === 0) { list.classList.add('hidden'); return; }
+        list.innerHTML = unique.map(name => `<div class="autocomplete-item" onmousedown="App.Customers.selectBank(this)">${name}</div>`).join('');
+        list.classList.remove('hidden');
+    },
+    selectBank(el) {
+        const input = el.closest('.bank-row').querySelector('.bank-name');
+        input.value = el.textContent;
+        el.parentElement.classList.add('hidden');
+        input.focus();
+    },
+    handleBankKeydown(e, input) { if (e.key === 'Escape') input.nextElementSibling.classList.add('hidden'); },
+    async save(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        if (!data.customerName.trim()) return Utils.toast('Customer Name is required!', 'error');
+        const banks = [];
+        document.querySelectorAll('.bank-row').forEach(row => {
+            const bName = row.querySelector('.bank-name').value.trim();
+            const bAcc = row.querySelectorAll('input')[1].value.trim();
+            const bIfsc = row.querySelectorAll('input')[2].value.trim();
+            if (bName || bAcc) banks.push({ bankName: bName, accountNo: bAcc, ifscCode: bIfsc });
+        });
+        try {
+            const custId = await db.customers.add({
+                fyId: State.currentFY.id, customerName: data.customerName.trim(), firmName: data.firmName.trim(),
+                contactNo: data.contactNo.trim(), panCardNo: data.panCardNo.trim().toUpperCase(), gstNo: data.gstNo.trim().toUpperCase(),
+                aadharNo: data.aadharNo.trim(), city: data.city.trim(), dob: data.dob.trim(), addedBy: data.addedBy.trim(),
+                address: data.address.trim(), createdAt: Utils.todayStr()
+            });
+            for (const b of banks) {
+                await db.bankAccounts.add({
+                    fyId: State.currentFY.id, customerId: custId, bankName: b.bankName, accountNo: b.accountNo, ifscCode: b.ifscCode,
+                    expectedFrom: State.currentFY.startDate, expectedTo: State.currentFY.endDate, isClosed: false
+                });
+            }
+            Utils.toast('Customer Added Successfully!', 'success');
+            this.renderAdd();
+        } catch (err) { Utils.toast('Database Error: ' + err.message, 'error'); }
+    },
+    async renderView() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `<div class="card"><h2 class="font-bold mb-4">👥 All Customers</h2><div style="overflow-x:auto;"><table class="data-table" id="customers-table"><thead><tr><th>ID</th><th>Customer Name</th><th>Firm Name</th><th>Contact</th><th>PAN</th><th>City</th><th>Added By</th></tr></thead><tbody></tbody></table></div></div>`;
+        const customers = await db.customers.where('fyId').equals(State.currentFY.id).sortBy('customerName');
+        document.querySelector('#customers-table tbody').innerHTML = customers.map(c => `
+            <tr ondblclick="App.Print.previewAndPrint([${c.id}])">
+                <td>${c.id}</td><td class="font-bold">${c.customerName}</td><td>${c.firmName || '—'}</td>
+                <td>${c.contactNo || '—'}</td><td>${c.panCardNo || '—'}</td><td>${c.city || '—'}</td><td>${c.addedBy}</td>
+            </tr>`).join('');
+        Utils.setStatus(`Total Records: ${customers.length}`);
+    },
+    async renderSearch() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2 class="font-bold mb-4">🔍 Search Customer</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="search-query" class="input" placeholder="Customer Name टाका..." onkeydown="if(event.key==='Enter') App.Customers.doSearch()">
+                    <button class="btn btn-primary" onclick="App.Customers.doSearch()">Search</button>
+                </div>
+                <div id="search-results" class="hidden"></div>
+            </div>`;
+    },
+    async doSearch() {
+        const query = document.getElementById('search-query').value.trim();
+        if (!query) return Utils.toast('नाव टाका.', 'error');
+        const results = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(query.toLowerCase())).toArray();
+        await db.searchHistory.add({ searchedBy: State.currentUser.username, searchQuery: query, resultName: results.length > 0 ? results[0].customerName : 'Not Found', searchedAt: Utils.nowStr() });
+        const resDiv = document.getElementById('search-results');
+        resDiv.classList.remove('hidden');
+        if (results.length === 0) { resDiv.innerHTML = `<p class="marathi text-center" style="color: var(--danger); padding: 1rem;">कोणताही customer सापडला नाही.</p>`; return; }
+        if (results.length === 1) { this.showCustomerCard(results[0]); return; }
+        resDiv.innerHTML = `<p class="marathi mb-2">'${query}' साठी ${results.length} customers सापडले:</p>
+            <div class="picker-list">${results.map(c => `
+                <div class="picker-item" onclick='App.Customers.showCustomerCard(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+                    <div class="font-bold">${c.customerName}</div>
+                    <div style="font-size:0.85rem; color: var(--text-secondary);">${c.firmName || ''} | ${c.contactNo || ''}</div>
+                </div>`).join('')}</div>`;
+    },
+    async showCustomerCard(c) {
+        const banks = await db.bankAccounts.where('customerId').equals(c.id).toArray();
+        const validPhone = Utils.normalizePhone(c.contactNo);
+        const waLink = validPhone.length === 10 ? `https://wa.me/91${validPhone}` : '#';
+        document.getElementById('search-results').innerHTML = `
+            <div class="card" style="border: 2px solid var(--accent);">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold" style="font-size: 1.2rem;">${c.customerName}</h3>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="App.Print.previewAndPrint([${c.id}])">🖨 Print</button>
+                        ${validPhone.length === 10 ? `<a href="${waLink}" target="_blank" class="btn btn-sm btn-success">💬 WhatsApp</a>` : `<button class="btn btn-sm btn-ghost" disabled title="Valid 10-digit number नाही">💬 WhatsApp</button>`}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem; margin-bottom: 1rem;">
+                    <div><strong>Firm:</strong> ${c.firmName || '—'}</div><div><strong>Contact:</strong> ${c.contactNo || '—'}</div>
+                    <div><strong>PAN:</strong> ${c.panCardNo || '—'}</div><div><strong>GST:</strong> ${c.gstNo || '—'}</div>
+                    <div><strong>Aadhar:</strong> ${c.aadharNo || '—'}</div><div><strong>City:</strong> ${c.city || '—'}</div>
+                    <div><strong>DOB:</strong> ${c.dob || '—'}</div><div><strong>Added By:</strong> ${c.addedBy}</div>
+                </div>
+                <div style="margin-bottom: 1rem;"><strong>Address:</strong> ${c.address || '—'}</div>
+                <div>
+                    <strong class="marathi">🏦 Bank Accounts:</strong>
+                    ${banks.length > 0 ? `<ul style="margin-top: 0.5rem; padding-left: 1.2rem;">${banks.map(b => `<li>${b.bankName} | A/C: ${b.accountNo}</li>`).join('')}</ul>` : '<p class="marathi" style="color: var(--text-secondary);">कोणतेही बँक खाते नाही.</p>'}
+                </div>
+            </div>`;
+    },
+    async renderSearchForEdit() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2 class="font-bold mb-4">✏️ Edit Customer</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="edit-search-query" class="input" placeholder="Customer Name टाका..." onkeydown="if(event.key==='Enter') App.Customers.doEditSearch()">
+                    <button class="btn btn-primary" onclick="App.Customers.doEditSearch()">Find</button>
+                </div>
+                <div id="edit-picker" class="hidden"></div>
+            </div>`;
+    },
+    async doEditSearch() {
+        const query = document.getElementById('edit-search-query').value.trim();
+        if (!query) return;
+        const results = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(query.toLowerCase())).toArray();
+        const picker = document.getElementById('edit-picker');
+        picker.classList.remove('hidden');
+        if (results.length === 1) { this.openEditModal(results[0]); return; }
+        picker.innerHTML = `<div class="picker-list">${results.map(c => `
+            <div class="picker-item" onclick='App.Customers.openEditModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+                <div class="font-bold">${c.customerName}</div><div style="font-size:0.85rem;">${c.firmName || ''} | ${c.contactNo || ''}</div>
+            </div>`).join('')}</div>`;
+    },
+    async openEditModal(c) {
+        const banks = await db.bankAccounts.where('customerId').equals(c.id).toArray();
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>Edit: ${c.customerName}</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body">
+                <form id="edit-customer-form" class="flex flex-col gap-4">
+                    <input type="hidden" name="id" value="${c.id}">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Customer Name *</label><input type="text" name="customerName" class="input" value="${c.customerName}" required></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Firm Name</label><input type="text" name="firmName" class="input" value="${c.firmName || ''}"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Contact No</label><input type="text" name="contactNo" class="input" value="${c.contactNo || ''}"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">PAN Card No</label><input type="text" name="panCardNo" class="input" value="${c.panCardNo || ''}" style="text-transform:uppercase;"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">GST No</label><input type="text" name="gstNo" class="input" value="${c.gstNo || ''}" style="text-transform:uppercase;"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Aadhar No</label><input type="text" name="aadharNo" class="input" value="${c.aadharNo || ''}"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">City</label><input type="text" name="city" class="input" value="${c.city || ''}"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Date of Birth</label><input type="text" name="dob" class="input" value="${c.dob || ''}"></div>
+                        <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Added By</label><input type="text" name="addedBy" class="input" value="${State.currentUser.username}" readonly></div>
+                    </div>
+                    <div><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Address</label><textarea name="address" class="input" rows="2">${c.address || ''}</textarea></div>
+                    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--bg-primary);">
+                        <h4 class="font-bold mb-2 marathi">🏦 Bank Accounts</h4>
+                        <div id="edit-bank-rows-container"></div>
+                        <button type="button" class="btn btn-primary mt-4" style="font-size:0.9rem;" onclick="App.Customers.addBankRowTo('edit-bank-rows-container')">➕ Add Bank Account</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="App.Customers.saveEdit()">💾 Save Changes</button>
+            </div>`;
+        banks.forEach(b => this.addBankRowTo('edit-bank-rows-container', b.bankName, b.accountNo, b.ifscCode));
+        App.UI.openModal('generic-modal');
+    },
+    addBankRowTo(containerId, bank = '', acc = '', ifsc = '') {
+        const container = document.getElementById(containerId);
+        const idx = container.children.length + 1;
+        const div = document.createElement('div'); div.className = 'bank-row';
+        div.innerHTML = `
+            <span style="font-weight:bold; width: 20px;">${idx}.</span>
+            <div class="autocomplete-wrapper">
+                <input type="text" class="input bank-name" placeholder="Bank Name" value="${bank}" oninput="App.Customers.handleBankAutocomplete(this)" onkeydown="App.Customers.handleBankKeydown(event, this)">
+                <div class="autocomplete-list hidden"></div>
+            </div>
+            <input type="text" class="input" placeholder="A/C No" value="${acc}" style="flex:1;">
+            <input type="text" class="input" placeholder="IFSC" value="${ifsc}" style="width: 120px;">
+            <button type="button" class="btn btn-danger" style="padding: 0.4rem 0.8rem;" onclick="this.parentElement.remove()">✖</button>`;
+        container.appendChild(div);
+    },
+    async saveEdit() {
+        const form = document.getElementById('edit-customer-form');
+        const data = Object.fromEntries(new FormData(form).entries());
+        const id = parseInt(data.id);
+        const oldCust = await db.customers.get(id);
+        const banks = [];
+        document.querySelectorAll('#edit-bank-rows-container .bank-row').forEach(row => {
+            const bName = row.querySelector('.bank-name').value.trim();
+            const bAcc = row.querySelectorAll('input')[1].value.trim();
+            const bIfsc = row.querySelectorAll('input')[2].value.trim();
+            if (bName || bAcc) banks.push({ bankName: bName, accountNo: bAcc, ifscCode: bIfsc });
+        });
+        await db.transaction('rw', db.customers, db.bankAccounts, db.editHistory, async () => {
+            await db.customers.update(id, {
+                customerName: data.customerName.trim(), firmName: data.firmName.trim(), contactNo: data.contactNo.trim(),
+                panCardNo: data.panCardNo.trim().toUpperCase(), gstNo: data.gstNo.trim().toUpperCase(), aadharNo: data.aadharNo.trim(),
+                city: data.city.trim(), dob: data.dob.trim(), addedBy: data.addedBy.trim(), address: data.address.trim()
+            });
+            await db.bankAccounts.where('customerId').equals(id).delete();
+            for (const b of banks) {
+                await db.bankAccounts.add({ fyId: State.currentFY.id, customerId: id, bankName: b.bankName, accountNo: b.accountNo, ifscCode: b.ifscCode,
+                    expectedFrom: State.currentFY.startDate, expectedTo: State.currentFY.endDate, isClosed: false });
+            }
+            const changedAt = Utils.nowStr();
+            const fields = ['customerName', 'firmName', 'contactNo', 'panCardNo', 'gstNo', 'aadharNo', 'city', 'dob', 'addedBy', 'address'];
+            for (const field of fields) {
+                const oldVal = (oldCust[field] || '').toString().trim();
+                const newVal = (data[field] || '').toString().trim();
+                if (oldVal !== newVal) {
+                    await db.editHistory.add({ fyId: State.currentFY.id, customerId: id, changedBy: State.currentUser.username, changedAt, fieldName: field, oldValue: oldVal, newValue: newVal });
+                }
+            }
+        });
+        Utils.toast('Customer Updated Successfully!', 'success');
+        App.UI.closeModal('generic-modal');
+        this.renderView();
+    },
+    async renderSearchForDelete() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2 class="font-bold mb-4" style="color: var(--danger);">🗑 Delete Customer</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="delete-search-query" class="input" placeholder="Customer Name टाका..." onkeydown="if(event.key==='Enter') App.Customers.doDeleteSearch()">
+                    <button class="btn btn-danger" onclick="App.Customers.doDeleteSearch()">Find</button>
+                </div>
+                <div id="delete-picker" class="hidden"></div>
+            </div>`;
+    },
+    async doDeleteSearch() {
+        const query = document.getElementById('delete-search-query').value.trim();
+        if (!query) return;
+        const results = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(query.toLowerCase())).toArray();
+        const picker = document.getElementById('delete-picker');
+        picker.classList.remove('hidden');
+        picker.innerHTML = `<div class="picker-list">${results.map(c => `
+            <div class="picker-item" style="border-left: 4px solid var(--danger);" onclick='App.Customers.confirmDelete(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+                <div class="font-bold">${c.customerName}</div><div style="font-size:0.85rem;">${c.firmName || ''} | ${c.contactNo || ''}</div>
+            </div>`).join('')}</div>`;
+    },
+    async confirmDelete(c) {
+        const banks = await db.bankAccounts.where('customerId').equals(c.id).toArray();
+        const notes = await db.customerNotes.where('customerId').equals(c.id).count();
+        const stmts = await db.statementRecords.where('customerId').equals(c.id).count();
+        Utils.confirmDialog('⚠️ Confirm Delete',
+            `Delete '${c.customerName}'?<br><br>Firm: ${c.firmName || '—'}<br>Contact: ${c.contactNo || '—'}<br>Bank Accounts: ${banks.length}<br>Notes: ${notes}<br>Statements: ${stmts}<br><br>सगळे related data कायमचे delete होतील!`,
+            async () => {
+                await db.transaction('rw', db.customers, db.bankAccounts, db.customerNotes, db.statementRecords, async () => {
+                    await db.bankAccounts.where('customerId').equals(c.id).delete();
+                    await db.customerNotes.where('customerId').equals(c.id).delete();
+                    await db.statementRecords.where('customerId').equals(c.id).delete();
+                    await db.customers.delete(c.id);
+                });
+                Utils.toast('Customer and all related data deleted.', 'success');
+                document.getElementById('delete-picker').classList.add('hidden');
+                document.getElementById('delete-search-query').value = '';
+            });
+    },
+    async renderAdvancedSearch() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🔎 Advanced Search</h2>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                    <input type="text" id="adv-name" class="input" placeholder="Customer Name">
+                    <input type="text" id="adv-firm" class="input" placeholder="Firm Name">
+                    <input type="text" id="adv-contact" class="input" placeholder="Contact No">
+                    <input type="text" id="adv-city" class="input" placeholder="City">
+                    <input type="text" id="adv-pan" class="input" placeholder="PAN Card No">
+                    <input type="text" id="adv-gst" class="input" placeholder="GST No">
+                    <input type="text" id="adv-aadhar" class="input" placeholder="Aadhar No">
+                    <input type="text" id="adv-added" class="input" placeholder="Added By">
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <button class="btn btn-primary" onclick="App.Customers.doAdvancedSearch()">🔎 Search</button>
+                    <button class="btn btn-ghost" onclick="App.Customers.clearAdvancedSearch()">🗑 Clear</button>
+                    <button class="btn btn-success hidden" id="adv-export-btn" onclick="App.Data.exportAdvancedSearch()">📤 Export to Excel</button>
+                </div>
+                <p id="adv-result-count" class="marathi mb-2"></p>
+                <div style="overflow-x:auto;"><table class="data-table" id="adv-table"><thead><tr><th>ID</th><th>Name</th><th>Firm</th><th>Contact</th><th>City</th><th>PAN</th><th>GST</th><th>Added By</th></tr></thead><tbody></tbody></table></div>
+            </div>`;
+    },
+    async doAdvancedSearch() {
+        const filters = {
+            customerName: document.getElementById('adv-name').value.trim().toLowerCase(),
+            firmName: document.getElementById('adv-firm').value.trim().toLowerCase(),
+            contactNo: document.getElementById('adv-contact').value.trim().toLowerCase(),
+            city: document.getElementById('adv-city').value.trim().toLowerCase(),
+            panCardNo: document.getElementById('adv-pan').value.trim().toLowerCase(),
+            gstNo: document.getElementById('adv-gst').value.trim().toLowerCase(),
+            aadharNo: document.getElementById('adv-aadhar').value.trim().toLowerCase(),
+            addedBy: document.getElementById('adv-added').value.trim().toLowerCase()
+        };
+        if (!Object.values(filters).some(v => v)) return Utils.toast('कमीत कमी एक field भरा.', 'error');
+        let results = await db.customers.where('fyId').equals(State.currentFY.id).toArray();
+        results = results.filter(c => {
+            return (!filters.customerName || (c.customerName || '').toLowerCase().includes(filters.customerName)) &&
+                   (!filters.firmName || (c.firmName || '').toLowerCase().includes(filters.firmName)) &&
+                   (!filters.contactNo || (c.contactNo || '').toLowerCase().includes(filters.contactNo)) &&
+                   (!filters.city || (c.city || '').toLowerCase().includes(filters.city)) &&
+                   (!filters.panCardNo || (c.panCardNo || '').toLowerCase().includes(filters.panCardNo)) &&
+                   (!filters.gstNo || (c.gstNo || '').toLowerCase().includes(filters.gstNo)) &&
+                   (!filters.aadharNo || (c.aadharNo || '').toLowerCase().includes(filters.aadharNo)) &&
+                   (!filters.addedBy || (c.addedBy || '').toLowerCase().includes(filters.addedBy));
+        });
+        document.getElementById('adv-result-count').textContent = results.length > 0 ? `✅ ${results.length} customers सापडले` : `❌ कोणताही customer सापडला नाही`;
+        document.getElementById('adv-export-btn').classList.toggle('hidden', results.length === 0);
+        window.advSearchResults = results;
+        document.querySelector('#adv-table tbody').innerHTML = results.map(c => `
+            <tr><td>${c.id}</td><td>${c.customerName}</td><td>${c.firmName || '—'}</td><td>${c.contactNo || '—'}</td>
+            <td>${c.city || '—'}</td><td>${c.panCardNo || '—'}</td><td>${c.gstNo || '—'}</td><td>${c.addedBy}</td></tr>`).join('');
+    },
+    clearAdvancedSearch() {
+        document.querySelectorAll('#content-area .input').forEach(i => i.value = '');
+        document.querySelector('#adv-table tbody').innerHTML = '';
+        document.getElementById('adv-result-count').textContent = '';
+        document.getElementById('adv-export-btn').classList.add('hidden');
+    }
+};
+
+// ==========================================
+// 7. CUSTOMER DIARY
+// ==========================================
+const Diary = {
+    selectedCust: null,
+    async render() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">📓 Customer Diary</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="diary-search" class="input" placeholder="Customer Name टाका..." onkeydown="if(event.key==='Enter') App.Diary.search()">
+                    <button class="btn btn-primary" onclick="App.Diary.search()">🔍 Search</button>
+                </div>
+                <div id="diary-cust-info" class="hidden"></div>
+                <div id="diary-content" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4 class="font-bold mb-2 marathi">📝 Notes History</h4>
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);">
+                            <table class="data-table" id="notes-table"><thead><tr><th>Date & Time</th><th>Note</th><th>Added By</th><th></th></tr></thead><tbody></tbody></table>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2 marathi">✏️ नवीन Note लिहा</h4>
+                        <textarea id="new-note" class="input" rows="6" placeholder="Note लिहा..."></textarea>
+                        <button class="btn btn-success mt-4 w-full" onclick="App.Diary.saveNote()">💾 Save Note</button>
+                    </div>
+                </div>
+            </div>`;
+    },
+    async search() {
+        const query = document.getElementById('diary-search').value.trim();
+        if (!query) return Utils.toast('नाव टाका.', 'error');
+        const results = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(query.toLowerCase())).toArray();
+        if (results.length === 0) return Utils.toast('Customer सापडला नाही.', 'error');
+        if (results.length === 1) { this.loadCust(results[0]); return; }
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>Select Customer</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body"><div class="picker-list">${results.map(c => `
+                <div class="picker-item" onclick='App.Diary.loadCust(${JSON.stringify(c).replace(/'/g, "&#39;")}); App.UI.closeModal("generic-modal")'>
+                    <div class="font-bold">${c.customerName}</div>
+                    <div style="font-size:0.85rem;">${c.firmName || ''} | ${c.contactNo || ''}</div>
+                </div>`).join('')}</div></div>`;
+        App.UI.openModal('generic-modal');
+    },
+    async loadCust(c) {
+        this.selectedCust = c;
+        document.getElementById('diary-cust-info').classList.remove('hidden');
+        document.getElementById('diary-cust-info').innerHTML = `<div class="card" style="background: var(--bg-primary);"><strong>👤 ${c.customerName}</strong> | 📞 ${c.contactNo || '—'} | 🏙 ${c.city || '—'}</div>`;
+        document.getElementById('diary-content').classList.remove('hidden');
+        await this.loadNotes();
+    },
+    async loadNotes() {
+        if (!this.selectedCust) return;
+        const notes = await db.customerNotes.where('customerId').equals(this.selectedCust.id).reverse().sortBy('id');
+        document.querySelector('#notes-table tbody').innerHTML = notes.map(n => `
+            <tr>
+                <td style="white-space:nowrap;">${n.addedAt}</td>
+                <td>${n.noteText}</td>
+                <td>${n.addedBy}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="App.Diary.deleteNote(${n.id})">🗑</button></td>
+            </tr>`).join('') || '<tr><td colspan="4" class="text-center marathi" style="color:var(--text-secondary);">कोणतेही notes नाहीत.</td></tr>';
+    },
+    async saveNote() {
+        if (!this.selectedCust) return Utils.toast('आधी customer select करा.', 'error');
+        const note = document.getElementById('new-note').value.trim();
+        if (!note) return Utils.toast('Note रिकामा आहे.', 'error');
+        const now = Utils.nowStr();
+        await db.customerNotes.add({ fyId: State.currentFY.id, customerId: this.selectedCust.id, noteText: note, addedBy: State.currentUser.username, addedAt: now });
+        await db.editHistory.add({ fyId: State.currentFY.id, customerId: this.selectedCust.id, changedBy: State.currentUser.username, changedAt: now, fieldName: 'Diary Note', oldValue: '', newValue: note });
+        document.getElementById('new-note').value = '';
+        Utils.toast('Note saved!', 'success');
+        this.loadNotes();
+    },
+    async deleteNote(noteId) {
+        if (!confirm('हा note delete करायचा?')) return;
+        await db.customerNotes.delete(noteId);
+        Utils.toast('Note deleted.', 'success');
+        this.loadNotes();
+    }
+};
+
+// ==========================================
+// 8. PRINT MODULE
+// ==========================================
+const Print = {
+    async renderById() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2 class="font-bold mb-4">🖨 Print Customer Details</h2>
+                <p class="marathi mb-4" style="color: var(--text-secondary);">Customer ID टाका (एक किंवा दोन customers एकत्र print करता येतात)</p>
+                <div class="flex gap-4 mb-4">
+                    <div class="w-full"><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Customer ID 1</label><input type="number" id="print-id-1" class="input" onkeydown="if(event.key==='Enter') App.Print.loadPreview()"></div>
+                    <div class="w-full"><label class="marathi" style="font-weight:600; display:block; margin-bottom:0.25rem;">Customer ID 2 (optional)</label><input type="number" id="print-id-2" class="input" onkeydown="if(event.key==='Enter') App.Print.loadPreview()"></div>
+                </div>
+                <button class="btn btn-primary w-full mb-4" onclick="App.Print.loadPreview()">🔍 Load Preview</button>
+                <div id="print-preview-area" class="hidden"></div>
+                <button id="print-action-btn" class="btn btn-success w-full hidden" onclick="App.Print.executePrint()">🖨 Print / Preview</button>
+            </div>`;
+    },
+    async loadPreview() {
+        const id1 = document.getElementById('print-id-1').value.trim();
+        const id2 = document.getElementById('print-id-2').value.trim();
+        const ids = [id1, id2].filter(Boolean).map(Number);
+        if (ids.length === 0) return Utils.toast('ID टाका.', 'error');
+        const customers = [];
+        for (const id of ids) { const c = await db.customers.get(id); if (c) customers.push(c); }
+        if (customers.length === 0) return Utils.toast('Customer सापडला नाही.', 'error');
+        window.printCustomers = customers;
+        const area = document.getElementById('print-preview-area');
+        area.classList.remove('hidden');
+        area.innerHTML = `<div style="display: grid; grid-template-columns: 1fr ${ids.length === 2 ? '1fr' : 'none'}; gap: 1rem;">${customers.map(c => this.buildPreviewCard(c)).join('')}</div>`;
+        document.getElementById('print-action-btn').classList.remove('hidden');
+    },
+    buildPreviewCard(c) {
+        return `<div class="print-preview-box">
+            <div class="sec-title">👤 Customer Information</div>
+            <table>
+                <tr><td class="lbl">ID</td><td>${c.id}</td></tr>
+                <tr style="background:#f0f6ff;"><td class="lbl">Customer Name</td><td>${c.customerName}</td></tr>
+                <tr><td class="lbl">Firm Name</td><td>${c.firmName || '—'}</td></tr>
+                <tr style="background:#f0f6ff;"><td class="lbl">Contact No</td><td>${c.contactNo || '—'}</td></tr>
+                <tr><td class="lbl">PAN Card No</td><td>${c.panCardNo || '—'}</td></tr>
+                <tr style="background:#f0f6ff;"><td class="lbl">GST No</td><td>${c.gstNo || '—'}</td></tr>
+                <tr><td class="lbl">Aadhar No</td><td>${c.aadharNo || '—'}</td></tr>
+                <tr style="background:#f0f6ff;"><td class="lbl">City</td><td>${c.city || '—'}</td></tr>
+                <tr><td class="lbl">Date of Birth</td><td>${c.dob || '—'}</td></tr>
+                <tr style="background:#f0f6ff;"><td class="lbl">Added By</td><td>${c.addedBy}</td></tr>
+                <tr><td class="lbl">Address</td><td>${c.address || '—'}</td></tr>
+            </table></div>`;
+    },
+    async previewAndPrint(ids) {
+        const customers = await db.customers.where('id').anyOf(ids).toArray();
+        if (customers.length === 0) return;
+        window.printCustomers = customers;
+        this.executePrint();
+    },
+    async executePrint() {
+        const customers = window.printCustomers;
+        if (!customers || customers.length === 0) return;
+        let blocksHtml = '';
+        for (let i = 0; i < customers.length; i++) {
+            const c = customers[i];
+            const banks = await db.bankAccounts.where('customerId').equals(c.id).toArray();
+            let fieldRows = '';
+            const fields = ["ID", "Customer Name", "Firm Name", "Contact No", "PAN Card No", "GST No", "Aadhar No", "City", "Date of Birth", "Added By", "Address"];
+            const values = [c.id, c.customerName, c.firmName, c.contactNo, c.panCardNo, c.gstNo, c.aadharNo, c.city, c.dob, c.addedBy, c.address];
+            fields.forEach((f, idx) => {
+                const shade = idx % 2 === 0 ? ' style="background:#f0f6ff;"' : '';
+                fieldRows += `<tr${shade}><td class="lbl">${f}</td><td>${values[idx] || '—'}</td></tr>`;
+            });
+            let bankRows = '';
+            if (banks.length > 0) {
+                banks.forEach((b, idx) => {
+                    const shade = (idx + 1) % 2 === 0 ? ' style="background:#f0f6ff;"' : '';
+                    bankRows += `<tr${shade}><td class="lbl">Bank A/C ${idx + 1}</td><td><b>${b.bankName || '—'}</b> &nbsp;|&nbsp; A/C: ${b.accountNo || '—'}</td></tr>`;
+                });
+            } else { bankRows = '<tr><td class="lbl">Bank Accounts</td><td>—</td></tr>'; }
+            let remarkRows = '';
+            for (let r = 0; r < 6; r++) remarkRows += '<tr><td class="rem-cell"></td><td class="rem-cell"></td><td class="rem-cell"></td></tr>';
+            blocksHtml += `<div class="card">
+                <div class="sec-title">👤 Customer Information</div>
+                <table class="info-tbl">${fieldRows}</table>
+                <div class="sec-title">🏦 Bank Accounts</div>
+                <table class="info-tbl">${bankRows}</table>
+                <div class="sec-title">📝 Remarks / Call Log</div>
+                <table class="rem-tbl">
+                    <tr><th class="rem-hdr" style="width:18%">Date</th><th class="rem-hdr" style="width:55%">काय म्हणाले (Notes)</th><th class="rem-hdr" style="width:27%">Phone कोणी केला</th></tr>
+                    ${remarkRows}
+                </table></div>`;
+            if ((i + 1) % 2 === 0 && (i + 1) < customers.length) blocksHtml += '</div><div style="page-break-after:always"></div><div class="two-col">';
+        }
+        const printDate = new Date().toLocaleString();
+        const fyLabel = State.currentFY ? State.currentFY.label : '';
+        const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Smart Ledger — Customer Print</title>
+<style>
+@page { size: A4 landscape; margin: 10mm 12mm; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body.a4-print-container { font-family: Arial, sans-serif; font-size: 12px; color: #111; background: #fff; }
+.page-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #004080; padding-bottom: 5px; margin-bottom: 8px; }
+.page-header h1 { color: #004080; font-size: 20px; letter-spacing: 2px; font-weight: 900; }
+.page-header .sub { font-size: 10px; color: #666; text-align: right; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card { border: 1.5px solid #004080; border-radius: 5px; padding: 7px 8px; background: #fff; page-break-inside: avoid; }
+.sec-title { background: #004080; color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 3px; margin: 5px 0 4px 0; }
+.info-tbl { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 11.5px; }
+.info-tbl td { padding: 3px 6px; vertical-align: top; border: 1px solid #dde; }
+.lbl { font-weight: bold; color: #004080; width: 34%; white-space: nowrap; }
+.rem-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 4px; }
+.rem-hdr { background: #e8f0ff; color: #004080; font-weight: bold; padding: 3px 5px; border: 1px solid #aac; text-align: center; }
+.rem-cell { height: 20px; border: 1px solid #ccd; padding: 2px 4px; }
+@media print { body { margin: 0; } .no-print { display: none; } }
+</style></head><body class="a4-print-container">
+<div class="page-header"><h1>📅 SMART LEDGER</h1><div class="sub">Customer Details Report<br>Printed: ${printDate} | FY: ${fyLabel}<br>made by Lucky Dahivadkar</div></div>
+<div class="two-col">${blocksHtml}</div>
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">🖨 Print Now</button>
+    <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;">Close</button>
+</div></body></html>`;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+    },
+    async renderBulk() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🖨 Bulk Print</h2>
+                <p class="marathi mb-4" style="color: var(--text-secondary);">Customers select करा (Ctrl+Click = multiple) → Print (Max 20)</p>
+                <div style="overflow-x:auto; max-height: 500px;">
+                    <table class="data-table" id="bulk-table">
+                        <thead><tr><th>Select</th><th>ID</th><th>Customer Name</th><th>Firm Name</th><th>Contact</th><th>City</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="App.Print.doBulkPrint()">🖨 Print Selected</button>
+            </div>`;
+        const customers = await db.customers.where('fyId').equals(State.currentFY.id).sortBy('customerName');
+        document.querySelector('#bulk-table tbody').innerHTML = customers.map(c => `
+            <tr><td><input type="checkbox" class="bulk-select" value="${c.id}"></td>
+            <td>${c.id}</td><td>${c.customerName}</td><td>${c.firmName || '—'}</td><td>${c.contactNo || '—'}</td><td>${c.city || '—'}</td></tr>`).join('');
+    },
+    async doBulkPrint() {
+        const checked = document.querySelectorAll('.bulk-select:checked');
+        if (checked.length === 0) return Utils.toast('कमीत कमी एक customer select करा.', 'error');
+        if (checked.length > 20) return Utils.toast('एकावेळी जास्तीत जास्त 20 customers print करता येतात.', 'error');
+        const ids = Array.from(checked).map(cb => parseInt(cb.value));
+        this.previewAndPrint(ids);
+    }
+};
+
+// ==========================================
+// 9. BANK FILTER
+// ==========================================
+const BankFilter = {
+    selectedBank: null,
+    async render() {
+        const area = document.getElementById('content-area');
+        const banks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        const uniqueBanks = [...new Set(banks.map(b => b.bankName).filter(n => n))].sort();
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🏦 Bank Filter</h2>
+                ${uniqueBanks.length === 0 ? '<p class="marathi" style="color:var(--text-secondary);">⚠️ अजून कोणत्याही customer ला bank account add केलेले नाही.</p>' : `
+                <div style="display: grid; grid-template-columns: 280px 1fr; gap: 1rem;">
+                    <div>
+                        <h4 class="font-bold mb-2 marathi">Banks</h4>
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);">
+                            ${uniqueBanks.map(b => `<div class="picker-item" onclick="App.BankFilter.selectBank('${b.replace(/'/g, "\\'")}')">🏦 ${b}</div>`).join('')}
+                        </div>
+                        <div class="flex gap-2 mt-4">
+                            <button class="btn btn-sm btn-warning" onclick="App.BankFilter.editBankName()">✏️ Edit Name</button>
+                            <button class="btn btn-sm btn-danger" onclick="App.BankFilter.mergeDelete()">🔀 Merge</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2 marathi" id="bank-cust-title">← Bank select करा</h4>
+                        <div style="overflow-x:auto;"><table class="data-table" id="bank-cust-table"><thead><tr><th>ID</th><th>Name</th><th>Firm</th><th>Contact</th><th>City</th><th>A/C No</th></tr></thead><tbody></tbody></table></div>
+                        <div class="flex gap-2 mt-4">
+                            <button class="btn btn-sm btn-success" onclick="App.BankFilter.exportExcel()">📤 Excel</button>
+                            <button class="btn btn-sm btn-danger" onclick="App.BankFilter.exportPDF()">📄 PDF</button>
+                        </div>
+                    </div>
+                </div>`}
+            </div>`;
+    },
+    async selectBank(bankName) {
+        this.selectedBank = bankName;
+        document.getElementById('bank-cust-title').textContent = `🏦 ${bankName} — Customers:`;
+        const accounts = await db.bankAccounts.where('fyId').equals(State.currentFY.id).filter(b => b.bankName === bankName).toArray();
+        const rows = [];
+        for (const a of accounts) {
+            const c = await db.customers.get(a.customerId);
+            if (c) rows.push({ id: c.id, name: c.customerName, firm: c.firmName, contact: c.contactNo, city: c.city, acc: a.accountNo });
+        }
+        window.bankFilterData = rows;
+        document.querySelector('#bank-cust-table tbody').innerHTML = rows.map(r => `
+            <tr><td>${r.id}</td><td class="font-bold">${r.name}</td><td>${r.firm || '—'}</td><td>${r.contact || '—'}</td><td>${r.city || '—'}</td><td>${r.acc || '—'}</td></tr>`).join('');
+        Utils.setStatus(`${bankName}: ${rows.length} customers`);
+    },
+    async editBankName() {
+        if (!this.selectedBank) return Utils.toast('आधी bank select करा.', 'error');
+        const newName = prompt(`Bank '${this.selectedBank}' चे नवीन नाव:`, this.selectedBank);
+        if (!newName || newName === this.selectedBank) return;
+        const accounts = await db.bankAccounts.where('fyId').equals(State.currentFY.id).filter(b => b.bankName === newName).toArray();
+        if (accounts.length > 0 && !confirm(`'${newName}' आधीच आहे. '${this.selectedBank}' चे सगळे accounts '${newName}' मध्ये merge करायचे का?`)) return;
+        await db.bankAccounts.where('fyId').equals(State.currentFY.id).filter(b => b.bankName === this.selectedBank).modify({ bankName: newName });
+        Utils.toast(`Bank renamed: ${this.selectedBank} → ${newName}`, 'success');
+        this.render();
+    },
+    async mergeDelete() {
+        if (!this.selectedBank) return Utils.toast('आधी duplicate bank select करा.', 'error');
+        const banks = [...new Set((await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray()).map(b => b.bankName).filter(n => n))].filter(b => b !== this.selectedBank);
+        if (banks.length === 0) return Utils.toast('Merge करण्यासाठी दुसरी bank आवश्यक आहे.', 'error');
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>🔀 Bank Merge & Delete</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body">
+                <p class="marathi mb-4">⚠️ '${this.selectedBank}' चे सगळे accounts निवडलेल्या bank मध्ये transfer होतील, नंतर '${this.selectedBank}' delete होईल.</p>
+                <div class="mb-4"><label class="marathi" style="display:block; margin-bottom:0.5rem;">Target Bank:</label>
+                    <select id="merge-target" class="input">${banks.map(b => `<option value="${b}">${b}</option>`).join('')}</select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button>
+                <button class="btn btn-danger" onclick="App.BankFilter.doMerge()">🔀 Merge & Delete</button>
+            </div>`;
+        App.UI.openModal('generic-modal');
+    },
+    async doMerge() {
+        const target = document.getElementById('merge-target').value;
+        if (!confirm(`'${this.selectedBank}' चे सगळे accounts '${target}' मध्ये transfer होतील. Continue?`)) return;
+        const count = await db.bankAccounts.where('fyId').equals(State.currentFY.id).filter(b => b.bankName === this.selectedBank).modify({ bankName: target });
+        Utils.toast(`Merged '${this.selectedBank}' → '${target}'`, 'success');
+        App.UI.closeModal('generic-modal');
+        this.selectedBank = null;
+        this.render();
+    },
+    exportExcel() {
+        if (!window.bankFilterData || window.bankFilterData.length === 0) return Utils.toast('Export साठी data नाही.', 'error');
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.bankFilterData), "Customers");
+        XLSX.writeFile(wb, `BankFilter_${this.selectedBank.replace(/ /g, '_')}.xlsx`);
+        Utils.toast('Exported!', 'success');
+    },
+    exportPDF() {
+        if (!window.bankFilterData || window.bankFilterData.length === 0) return Utils.toast('Export साठी data नाही.', 'error');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.setFontSize(16); doc.setTextColor(0, 64, 128);
+        doc.text('SMART LEDGER — Bank Filter Report', 148.5, 15, { align: 'center' });
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text(`Bank: ${this.selectedBank} | Total: ${window.bankFilterData.length} | Date: ${Utils.nowStr()}`, 148.5, 22, { align: 'center' });
+        doc.autoTable({
+            startY: 30,
+            head: [['ID', 'Name', 'Firm', 'Contact', 'City', 'A/C No']],
+            body: window.bankFilterData.map(r => [r.id, r.name, r.firm || '—', r.contact || '—', r.city || '—', r.acc || '—']),
+            theme: 'grid',
+            headStyles: { fillColor: [0, 64, 128] },
+            alternateRowStyles: { fillColor: [234, 243, 255] }
+        });
+        doc.save(`BankFilter_${this.selectedBank.replace(/ /g, '_')}.pdf`);
+        Utils.toast('PDF exported!', 'success');
+    }
+};
+
+// ==========================================
+// 10. DOCUMENT REQUEST + STATEMENT TRACKER
+// ==========================================
+const DocRequest = {
+    selectedCust: null,
+    activeTab: 'request',
+    getDefaultMessage() {
+        const fy = State.currentFY;
+        return `नमस्कार 🙏,
+
+Financial Year ${fy.startDate} TO ${fy.endDate} संपल्यामुळे आपले ACCOUNTING & ITR काम पूर्ण करण्यासाठी काही आवश्यक कागदपत्रांची गरज आहे. कृपया खालील डॉक्युमेंट्स लवकरात लवकर पाठवावेत:
+
+1️⃣ सर्व बँक स्टेटमेंट, कर्ज खाते स्टेटमेंट
+2️⃣ खरेदी बिल
+3️⃣ विक्री बिल
+4️⃣ खर्चाचे बिल
+5️⃣ मालमत्ता खरेदी खत, विक्री खत
+6️⃣ व्यापारी खाते उतारे
+7️⃣ विमा पावती
+8️⃣ मुदत ठेव पावती असल्यास
+9️⃣ शेअर मार्केट स्टेटमेंट
+🔟 इतर व्यवहार असल्यास ती कागदपत्रे
+1️⃣1️⃣ खाली दिलेल्या बँक खात्याव्यतिरिक्त आणखी दुसरे बँक खाते असल्यास ते सुद्धा पाठवावे
+
+कृपया हे डॉक्युमेंट्स WhatsApp / Email द्वारे लवकर पाठवावे, जेणेकरून तुमचे काम वेळेत पूर्ण करता येईल.
+
+ऑफिस चा मेल id - acoffice1980@gmail.com
+
+धन्यवाद 🙏`;
+    },
+    async render() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">📋 Document Request & Statement Tracker</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="App.DocRequest.switchTab('request')">📋 Document Request</div>
+                    <div class="tab" onclick="App.DocRequest.switchTab('pending')">📌 Pending Statements Overview</div>
+                </div>
+                <div id="doc-tab-content"></div>
+            </div>`;
+        this.switchTab('request');
+    },
+    async switchTab(tab) {
+        this.activeTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event?.target?.classList?.add('active');
+        if (tab === 'request') await this.renderRequestTab();
+        else await this.renderPendingTab();
+    },
+    async renderRequestTab() {
+        const container = document.getElementById('doc-tab-content');
+        container.innerHTML = `
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="doc-search" class="input" placeholder="Customer Name टाका..." onkeydown="if(event.key==='Enter') App.DocRequest.searchCustomer()">
+                <button class="btn btn-primary" onclick="App.DocRequest.searchCustomer()">🔍 Search</button>
+            </div>
+            <div id="doc-cust-info"></div>
+            <div id="doc-banks-area"></div>
+            <div id="doc-message-area" class="hidden">
+                <h4 class="font-bold mb-2 marathi">💬 WhatsApp Message</h4>
+                <textarea id="doc-message" class="input" rows="10"></textarea>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-sm btn-ghost" onclick="document.getElementById('doc-message').value = App.DocRequest.getDefaultMessage()">🔄 Reset Default</button>
+                    <button class="btn btn-sm btn-success" onclick="App.DocRequest.sendWA()">💬 Send WhatsApp</button>
+                </div>
+            </div>`;
+    },
+    async searchCustomer() {
+        const query = document.getElementById('doc-search').value.trim();
+        if (!query) return Utils.toast('नाव टाका.', 'error');
+        const results = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(query.toLowerCase())).toArray();
+        if (results.length === 0) return Utils.toast('Customer सापडला नाही.', 'error');
+        if (results.length === 1) { this.loadCustomer(results[0]); return; }
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>Select Customer</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body"><div class="picker-list">${results.map(c => `
+                <div class="picker-item" onclick='App.DocRequest.loadCustomer(${JSON.stringify(c).replace(/'/g, "&#39;")}); App.UI.closeModal("generic-modal")'>
+                    <div class="font-bold">${c.customerName}</div>
+                    <div style="font-size:0.85rem;">${c.firmName || ''} | ${c.contactNo || ''}</div>
+                </div>`).join('')}</div></div>`;
+        App.UI.openModal('generic-modal');
+    },
+    async loadCustomer(c) {
+        this.selectedCust = c;
+        document.getElementById('doc-cust-info').innerHTML = `<div class="card" style="background: var(--bg-primary);"><strong>👤 ${c.customerName}</strong> | 📞 ${c.contactNo || '—'} | 🏙 ${c.city || '—'}</div>`;
+        document.getElementById('doc-message-area').classList.remove('hidden');
+        document.getElementById('doc-message').value = this.getDefaultMessage();
+        await this.renderBankCards();
+    },
+    async renderBankCards() {
+        if (!this.selectedCust) return;
+        const banks = await db.bankAccounts.where('customerId').equals(this.selectedCust.id).toArray();
+        const area = document.getElementById('doc-banks-area');
+        if (banks.length === 0) { area.innerHTML = '<p class="marathi" style="color:var(--text-secondary);">कोणतेही bank accounts नाहीत.</p>'; return; }
+        let html = '<h4 class="font-bold mb-2 marathi">🏦 Bank Accounts & Statement Status</h4>';
+        for (const b of banks) {
+            const records = await db.statementRecords.where('bankAccountId').equals(b.id).toArray();
+            const status = this.computeStatus(b, records);
+            const timeline = this.buildTimeline(b, records);
+            const received = records.map(r => `<li>${r.fromDate} → ${r.toDate} | Received: ${r.receivedOn} | ${r.mode} | By: ${r.receivedBy}${r.remarks ? ' | ' + r.remarks : ''}</li>`).join('');
+            const pending = this.computePendingRanges(b, records);
+            const pendingHtml = pending.length > 0 ? pending.map(p => `<li style="color:var(--danger);">${p.from} → ${p.to}</li>`).join('') : '<li style="color:var(--success);">✅ सर्व statements प्राप्त झाले!</li>';
+            html += `
+                <div class="bank-stmt-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <div><strong>🏦 ${b.bankName}</strong> | A/C: ${b.accountNo}</div>
+                        <div class="flex gap-2 items-center">
+                            <span class="stmt-status ${status.class}">${status.label}</span>
+                            ${b.isClosed ? '' : `<button class="btn btn-sm btn-primary" onclick="App.StatementTracker.addRecord(${b.id})">➕ Statement Received</button>`}
+                        </div>
+                    </div>
+                    <div class="timeline">${timeline}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
+                        <div>
+                            <strong style="color:var(--success);">✅ Received:</strong>
+                            ${received ? `<ul style="padding-left:1.2rem; margin-top:0.25rem;">${received}</ul>` : '<p style="color:var(--text-secondary);">—</p>'}
+                        </div>
+                        <div>
+                            <strong style="color:var(--danger);">⏳ Pending:</strong>
+                            <ul style="padding-left:1.2rem; margin-top:0.25rem;">${pendingHtml}</ul>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        area.innerHTML = html;
+    },
+    computeStatus(bank, records) {
+        if (bank.isClosed) return { label: '⚪ Not Required', class: 'stmt-closed' };
+        if (records.length === 0) return { label: '🔴 Pending', class: 'stmt-pending' };
+        const pending = this.computePendingRanges(bank, records);
+        if (pending.length === 0) return { label: '🟢 Fully Received', class: 'stmt-full' };
+        return { label: '🟡 Partially Received', class: 'stmt-partial' };
+    },
+    buildTimeline(bank, records) {
+        const fyStart = Utils.parseDate(bank.expectedFrom || State.currentFY.startDate);
+        const fyEnd = Utils.parseDate(bank.expectedTo || State.currentFY.endDate);
+        if (!fyStart || !fyEnd) return '';
+        const totalMs = fyEnd - fyStart;
+        const months = Utils.fyMonths();
+        let html = '';
+        for (let i = 0; i < 12; i++) {
+            const mStart = new Date(fyStart); mStart.setMonth(fyStart.getMonth() + i); mStart.setDate(1);
+            const mEnd = new Date(mStart); mEnd.setMonth(mStart.getMonth() + 1); mEnd.setDate(0);
+            const covered = records.some(r => {
+                const rFrom = Utils.parseDate(r.fromDate); const rTo = Utils.parseDate(r.toDate);
+                return rFrom && rTo && rFrom <= mEnd && rTo >= mStart;
+            });
+            html += `<div class="timeline-segment ${covered ? 'received' : 'pending'}" title="${months[i]}: ${covered ? 'Received' : 'Pending'}" style="flex:1;"></div>`;
+        }
+        return html;
+    },
+    computePendingRanges(bank, records) {
+        const fyStart = Utils.toISO(bank.expectedFrom || State.currentFY.startDate);
+        const fyEnd = Utils.toISO(bank.expectedTo || State.currentFY.endDate);
+        if (!fyStart || !fyEnd) return [];
+        const ranges = records.map(r => ({ from: Utils.toISO(r.fromDate), to: Utils.toISO(r.toDate) })).filter(r => r.from && r.to).sort((a,b) => a.from.localeCompare(b.from));
+        // Merge overlapping
+        const merged = [];
+        for (const r of ranges) {
+            if (merged.length === 0 || merged[merged.length-1].to < r.from) merged.push({...r});
+            else merged[merged.length-1].to = new Date(Math.max(new Date(merged[merged.length-1].to), new Date(r.to))).toISOString().slice(0,10);
+        }
+        // Subtract from FY
+        const pending = [];
+        let cursor = fyStart;
+        for (const m of merged) {
+            if (m.from > cursor) pending.push({ from: this.fmtDate(cursor), to: this.fmtDate(new Date(new Date(m.from).getTime() - 86400000).toISOString().slice(0,10)) });
+            cursor = new Date(new Date(m.to).getTime() + 86400000).toISOString().slice(0,10);
+        }
+        if (cursor <= fyEnd) pending.push({ from: this.fmtDate(cursor), to: this.fmtDate(fyEnd) });
+        return pending.filter(p => p.from <= p.to);
+    },
+    fmtDate(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}-${m}-${y}`; },
+    async sendWA() {
+        if (!this.selectedCust) return;
+        const contact = Utils.normalizePhone(this.selectedCust.contactNo);
+        if (contact.length !== 10) return Utils.toast('Valid 10-digit number नाही.', 'error');
+        const baseMsg = document.getElementById('doc-message').value.trim();
+        const banks = await db.bankAccounts.where('customerId').equals(this.selectedCust.id).toArray();
+        let bankLines = '\n\n📌 आपल्या नोंदणीतील Bank Accounts:\n';
+        for (let i = 0; i < banks.length; i++) bankLines += `  ${i+1}. ${banks[i].bankName || '—'} | A/C: ${banks[i].accountNo || '—'}\n`;
+        const fullMsg = baseMsg + (banks.length > 0 ? bankLines : '');
+        window.open(`https://wa.me/91${contact}?text=${encodeURIComponent(fullMsg)}`, '_blank');
+        Utils.toast('WhatsApp उघडले!', 'success');
+    },
+    async renderPendingTab() {
+        const container = document.getElementById('doc-tab-content');
+        const banks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        const rows = [];
+        let totalAccounts = 0, fullCount = 0, partialCount = 0, pendingCount = 0, closedCount = 0;
+        for (const b of banks) {
+            const c = await db.customers.get(b.customerId);
+            if (!c) continue;
+            const records = await db.statementRecords.where('bankAccountId').equals(b.id).toArray();
+            const status = this.computeStatus(b, records);
+            const pending = this.computePendingRanges(b, records);
+            const receivedPct = pending.length === 0 && !b.isClosed ? 100 : (b.isClosed ? 100 : Math.round(((12 - pending.length) / 12) * 100));
+            totalAccounts++;
+            if (b.isClosed) closedCount++;
+            else if (status.class === 'stmt-full') fullCount++;
+            else if (status.class === 'stmt-partial') partialCount++;
+            else pendingCount++;
+            rows.push({ custName: c.customerName, city: c.city, addedBy: c.addedBy, bank: b.bankName, acc: b.accountNo, status: status.label, statusClass: status.class, pct: receivedPct, pendingCount: pending.length, pendingRanges: pending.map(p => `${p.from} → ${p.to}`).join(', ') || '—', lastReceived: records.length > 0 ? records[records.length-1].receivedOn : '—', bankId: b.id, custId: c.id });
+        }
+        rows.sort((a,b) => b.pendingCount - a.pendingCount);
+        window.pendingOverview = rows;
+        container.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div class="card" style="background: var(--accent); color: white; text-align: center; padding: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${totalAccounts}</div><div class="marathi">Total Accounts</div>
+                </div>
+                <div class="card" style="background: var(--success); color: white; text-align: center; padding: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${fullCount}</div><div class="marathi">Fully Received</div>
+                </div>
+                <div class="card" style="background: var(--warning); color: #000; text-align: center; padding: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${partialCount}</div><div class="marathi">Partial</div>
+                </div>
+                <div class="card" style="background: var(--danger); color: white; text-align: center; padding: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${pendingCount}</div><div class="marathi">Pending</div>
+                </div>
+                <div class="card" style="background: #6b7280; color: white; text-align: center; padding: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${totalAccounts > 0 ? Math.round(((fullCount+closedCount)/totalAccounts)*100) : 0}%</div><div class="marathi">Completion</div>
+                </div>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <button class="btn btn-sm btn-success" onclick="App.DocRequest.exportPendingExcel()">📤 Excel</button>
+                <button class="btn btn-sm btn-danger" onclick="App.DocRequest.exportPendingPDF()">📄 PDF</button>
+                <button class="btn btn-sm btn-info" onclick="App.DocRequest.bulkReminder()">💬 Bulk Reminder</button>
+            </div>
+            <div style="overflow-x:auto;"><table class="data-table" id="pending-table">
+                <thead><tr><th>Customer</th><th>Bank</th><th>A/C</th><th>Status</th><th>%</th><th>Pending Ranges</th><th>Last Received</th><th>Action</th></tr></thead>
+                <tbody>${rows.map(r => `
+                    <tr>
+                        <td class="font-bold">${r.custName}</td><td>${r.bank}</td><td>${r.acc}</td>
+                        <td><span class="stmt-status ${r.statusClass}">${r.status}</span></td>
+                        <td>${r.pct}%</td>
+                        <td style="font-size:0.8rem;">${r.pendingRanges}</td>
+                        <td>${r.lastReceived}</td>
+                        <td><button class="btn btn-sm btn-info" onclick="App.DocRequest.remindOne(${r.custId})">💬</button></td>
+                    </tr>`).join('')}</tbody>
+            </table></div>`;
+    },
+    async remindOne(custId) {
+        const c = await db.customers.get(custId);
+        if (!c) return;
+        const contact = Utils.normalizePhone(c.contactNo);
+        if (contact.length !== 10) return Utils.toast(`${c.customerName}: Valid number नाही.`, 'error');
+        const banks = await db.bankAccounts.where('customerId').equals(custId).toArray();
+        let pendingLines = '';
+        for (const b of banks) {
+            const records = await db.statementRecords.where('bankAccountId').equals(b.id).toArray();
+            const pending = this.computePendingRanges(b, records);
+            if (pending.length > 0 && !b.isClosed) {
+                pendingLines += `\n• ${b.bankName} – A/C ${b.accountNo} : ${pending.map(p => `${p.from} ते ${p.to}`).join(', ')} चे statement बाकी आहे`;
+            }
+        }
+        if (!pendingLines) return Utils.toast(`${c.customerName}: सर्व statements प्राप्त!`, 'success');
+        const msg = `नमस्कार ${c.customerName} 🙏,\n\nआपल्या खालील bank statements अजून बाकी आहेत:${pendingLines}\n\nकृपया लवकरात लवकर पाठवावेत.\n\nधन्यवाद 🙏\n— SMART LEDGER`;
+        window.open(`https://wa.me/91${contact}?text=${encodeURIComponent(msg)}`, '_blank');
+    },
+    async bulkReminder() {
+        const pending = (window.pendingOverview || []).filter(r => r.pendingCount > 0 && r.statusClass !== 'stmt-closed');
+        if (pending.length === 0) return Utils.toast('कोणतेही pending statements नाहीत.', 'info');
+        if (!confirm(`${pending.length} customers ला reminder पाठवायचा?`)) return;
+        const uniqueCusts = [...new Map(pending.map(r => [r.custId, r])).values()];
+        for (const r of uniqueCusts) {
+            await this.remindOne(r.custId);
+            await new Promise(res => setTimeout(res, 500));
+        }
+    },
+    exportPendingExcel() {
+        if (!window.pendingOverview) return;
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.pendingOverview.map(r => ({
+            Customer: r.custName, Bank: r.bank, 'A/C': r.acc, Status: r.status, '%': r.pct, 'Pending Ranges': r.pendingRanges, 'Last Received': r.lastReceived
+        }))), "Pending Statements");
+        XLSX.writeFile(wb, `PendingStatements_${State.currentFY.label.replace(/ /g, '_')}.xlsx`);
+        Utils.toast('Exported!', 'success');
+    },
+    exportPendingPDF() {
+        if (!window.pendingOverview) return;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.setFontSize(16); doc.setTextColor(0, 64, 128);
+        doc.text('SMART LEDGER — Pending Statements Overview', 148.5, 15, { align: 'center' });
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text(`FY: ${State.currentFY.label} | Date: ${Utils.nowStr()}`, 148.5, 22, { align: 'center' });
+        doc.autoTable({
+            startY: 30,
+            head: [['Customer', 'Bank', 'A/C', 'Status', '%', 'Pending Ranges', 'Last Received']],
+            body: window.pendingOverview.map(r => [r.custName, r.bank, r.acc, r.status, r.pct + '%', r.pendingRanges, r.lastReceived]),
+            theme: 'grid', headStyles: { fillColor: [0, 64, 128] }, alternateRowStyles: { fillColor: [234, 243, 255] }
+        });
+        doc.save(`PendingStatements_${State.currentFY.label.replace(/ /g, '_')}.pdf`);
+        Utils.toast('PDF exported!', 'success');
+    }
+};
+
+// ==========================================
+// 11. STATEMENT TRACKER
+// ==========================================
+const StatementTracker = {
+    async addRecord(bankAccountId) {
+        const bank = await db.bankAccounts.get(bankAccountId);
+        const cust = await db.customers.get(bank.customerId);
+        const fyStart = bank.expectedFrom || State.currentFY.startDate;
+        const fyEnd = bank.expectedTo || State.currentFY.endDate;
+        const today = Utils.todayStr();
+        const months = Utils.fyMonths();
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>➕ Statement Received</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+            <div class="modal-body">
+                <p class="marathi mb-4"><strong>${cust.customerName}</strong> — ${bank.bankName} | A/C: ${bank.accountNo}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><label class="marathi" style="display:block; margin-bottom:0.25rem;">From Date</label><input type="date" id="stmt-from" class="input" value="${Utils.toISO(fyStart)}"></div>
+                    <div><label class="marathi" style="display:block; margin-bottom:0.25rem;">To Date</label><input type="date" id="stmt-to" class="input" value="${Utils.toISO(fyEnd)}"></div>
+                    <div><label class="marathi" style="display:block; margin-bottom:0.25rem;">Received On</label><input type="date" id="stmt-received" class="input" value="${Utils.toISO(today)}"></div>
+                    <div><label class="marathi" style="display:block; margin-bottom:0.25rem;">Mode</label>
+                        <select id="stmt-mode" class="input">
+                            <option>WhatsApp</option><option>Email</option><option>Physical</option><option>Pendrive</option><option>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4"><label class="marathi" style="display:block; margin-bottom:0.25rem;">Remarks</label><input type="text" id="stmt-remarks" class="input" placeholder="Optional"></div>
+                <div class="mt-4">
+                    <label class="marathi font-bold" style="display:block; margin-bottom:0.5rem;">Quick Select:</label>
+                    <button class="btn btn-sm btn-primary" onclick="document.getElementById('stmt-from').value='${Utils.toISO(fyStart)}'; document.getElementById('stmt-to').value='${Utils.toISO(fyEnd)}'">Full FY</button>
+                    <button class="btn btn-sm btn-info" onclick="document.getElementById('stmt-to').value='${Utils.toISO(today)}'">Till Today</button>
+                </div>
+                <div class="mt-4">
+                    <label class="marathi font-bold" style="display:block; margin-bottom:0.5rem;">Month Chips:</label>
+                    <div id="month-chips">${months.map((m, i) => `<span class="month-chip" data-idx="${i}" onclick="this.classList.toggle('selected')">${m}</span>`).join('')}</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="App.StatementTracker.saveRecord(${bankAccountId})">💾 Save</button>
+            </div>`;
+        App.UI.openModal('generic-modal');
+    },
+    async saveRecord(bankAccountId) {
+        const from = document.getElementById('stmt-from').value;
+        const to = document.getElementById('stmt-to').value;
+        const received = document.getElementById('stmt-received').value;
+        const mode = document.getElementById('stmt-mode').value;
+        const remarks = document.getElementById('stmt-remarks').value.trim();
+        if (!from || !to || !received) return Utils.toast('सर्व dates भरा.', 'error');
+        if (from > to) return Utils.toast('From date To date नंतर असू शकत नाही.', 'error');
+        const bank = await db.bankAccounts.get(bankAccountId);
+        await db.statementRecords.add({
+            fyId: State.currentFY.id, customerId: bank.customerId, bankAccountId,
+            fromDate: Utils.formatDate(from), toDate: Utils.formatDate(to), receivedOn: Utils.formatDate(received),
+            receivedBy: State.currentUser.username, mode, remarks, createdAt: Utils.nowStr()
+        });
+        await db.editHistory.add({
+            fyId: State.currentFY.id, customerId: bank.customerId, changedBy: State.currentUser.username, changedAt: Utils.nowStr(),
+            fieldName: 'Statement Received', oldValue: '', newValue: `${bank.bankName} | ${Utils.formatDate(from)} → ${Utils.formatDate(to)}`
+        });
+        Utils.toast('Statement record saved!', 'success');
+        App.UI.closeModal('generic-modal');
+        DocRequest.renderBankCards();
+    }
+};
+
+// ==========================================
+// 12. BIRTHDAY REMINDER
+// ==========================================
+const Birthday = {
+    filter: 'today',
+    async render() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🎂 Birthday Reminder</h2>
+                <div class="flex gap-4 mb-4">
+                    <label class="flex items-center gap-2 marathi"><input type="radio" name="bday-filter" value="today" checked onchange="App.Birthday.load()"> आज (Today)</label>
+                    <label class="flex items-center gap-2 marathi"><input type="radio" name="bday-filter" value="month" onchange="App.Birthday.load()"> या महिन्यात (This Month)</label>
+                    <label class="flex items-center gap-2 marathi"><input type="radio" name="bday-filter" value="all" onchange="App.Birthday.load()"> सगळे (All)</label>
+                    <button class="btn btn-success" onclick="App.Birthday.wishSelected()">💬 WhatsApp Wish</button>
+                </div>
+                <p id="bday-count" class="marathi mb-2"></p>
+                <div style="overflow-x:auto;"><table class="data-table" id="bday-table"><thead><tr><th>Select</th><th>Name</th><th>Firm</th><th>Contact</th><th>DOB</th><th>City</th></tr></thead><tbody></tbody></table></div>
+            </div>`;
+        this.load();
+    },
+    async load() {
+        this.filter = document.querySelector('input[name="bday-filter"]:checked').value;
+        const today = Utils.todayStr().slice(0, 5);
+        const month = Utils.todayStr().slice(3, 5);
+        let customers = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.dob).toArray();
+        if (this.filter === 'today') customers = customers.filter(c => c.dob && c.dob.startsWith(today));
+        else if (this.filter === 'month') customers = customers.filter(c => c.dob && c.dob.slice(3, 5) === month);
+        customers.sort((a,b) => (a.dob || '').localeCompare(b.dob || ''));
+        document.getElementById('bday-count').textContent = `🎂 ${customers.length} records`;
+        document.querySelector('#bday-table tbody').innerHTML = customers.map(c => {
+            const isToday = c.dob && c.dob.startsWith(today);
+            return `<tr style="${isToday ? 'background:#fff3cd;' : ''}">
+                <td><input type="checkbox" class="bday-select" value="${c.id}"></td>
+                <td class="font-bold">${c.customerName}</td><td>${c.firmName || '—'}</td><td>${c.contactNo || '—'}</td>
+                <td>${c.dob}</td><td>${c.city || '—'}</td></tr>`;
+        }).join('');
+    },
+    async wishSelected() {
+        const checked = document.querySelectorAll('.bday-select:checked');
+        if (checked.length === 0) return Utils.toast('Customer select करा.', 'error');
+        for (const cb of checked) {
+            const c = await db.customers.get(parseInt(cb.value));
+            if (!c) continue;
+            const phone = Utils.normalizePhone(c.contactNo);
+            if (phone.length === 10) {
+                window.open(`https://wa.me/91${phone}?text=${encodeURIComponent('Happy Birthday! वाढदिवसाच्या हार्दिक शुभेच्छा! 🎂🎉')}`, '_blank');
+                await new Promise(res => setTimeout(res, 500));
+            }
+        }
+    }
+};
+
+// ==========================================
+// 13. BANK REPORT (Pie Chart)
+// ==========================================
+const BankReport = {
+    async render() {
+        const area = document.getElementById('content-area');
+        const banks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        const bankMap = {};
+        for (const b of banks) {
+            if (!b.bankName) continue;
+            if (!bankMap[b.bankName]) bankMap[b.bankName] = new Set();
+            bankMap[b.bankName].add(b.customerId);
+        }
+        const rows = Object.entries(bankMap).map(([name, custs]) => ({ name, count: custs.size })).sort((a,b) => b.count - a.count);
+        const total = rows.reduce((s, r) => s + r.count, 0);
+        const colors = ['#004080','#1a6fad','#2196f3','#42a5f5','#90caf9','#e67e22','#f39c12','#27ae60','#2ecc71','#8e44ad','#e74c3c','#c0392b'];
+        if (rows.length === 0) { area.innerHTML = '<div class="card"><p class="marathi">कोणताही Bank data नाही.</p></div>'; return; }
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🏦 Bank-wise Report</h2>
+                <div class="pie-container">
+                    <svg width="300" height="300" viewBox="-150 -150 300 300" id="pie-svg"></svg>
+                    <table class="data-table" style="flex:1;">
+                        <thead><tr><th>Color</th><th>Bank Name</th><th>Customers</th><th>%</th></tr></thead>
+                        <tbody>${rows.map((r, i) => `<tr>
+                            <td><span class="bank-swatch" style="background:${colors[i % colors.length]};"></span></td>
+                            <td class="font-bold">${r.name}</td><td>${r.count}</td><td>${(r.count/total*100).toFixed(1)}%</td>
+                        </tr>`).join('')}
+                        <tr style="background:#e8f0fe;"><td></td><td class="font-bold">TOTAL</td><td class="font-bold">${total}</td><td class="font-bold">100%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        this.drawPie(rows, total, colors);
+    },
+    drawPie(rows, total, colors) {
+        const svg = document.getElementById('pie-svg');
+        let startAngle = -Math.PI / 2;
+        rows.forEach((r, i) => {
+            const angle = (r.count / total) * 2 * Math.PI;
+            const endAngle = startAngle + angle;
+            const largeArc = angle > Math.PI ? 1 : 0;
+            const x1 = 120 * Math.cos(startAngle), y1 = 120 * Math.sin(startAngle);
+            const x2 = 120 * Math.cos(endAngle), y2 = 120 * Math.sin(endAngle);
+            const path = `M 0 0 L ${x1} ${y1} A 120 120 0 ${largeArc} 1 ${x2} ${y2} Z`;
+            svg.innerHTML += `<path d="${path}" fill="${colors[i % colors.length]}" stroke="white" stroke-width="2"/>`;
+            if (angle > 0.26) {
+                const midAngle = startAngle + angle / 2;
+                const lx = 75 * Math.cos(midAngle), ly = 75 * Math.sin(midAngle);
+                svg.innerHTML += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="11" font-weight="bold">${Math.round(r.count/total*100)}%</text>`;
+            }
+            startAngle = endAngle;
+        });
+    }
+};
+
+// ==========================================
+// 14. EDIT HISTORY
+// ==========================================
+const EditHistory = {
+    async render() {
+        const area = document.getElementById('content-area');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">📋 Edit History</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="hist-filter" class="input" placeholder="Customer Name (optional)" onkeydown="if(event.key==='Enter') App.EditHistory.load()">
+                    <button class="btn btn-primary" onclick="App.EditHistory.load()">🔍 Filter</button>
+                </div>
+                <div style="overflow-x:auto; max-height: 500px;"><table class="data-table" id="hist-table"><thead><tr><th>Date & Time</th><th>Customer</th><th>Changed By</th><th>Field</th><th>Old Value</th><th>New Value</th></tr></thead><tbody></tbody></table></div>
+            </div>`;
+        this.load();
+    },
+    async load() {
+        const filter = document.getElementById('hist-filter').value.trim().toLowerCase();
+        let records = await db.editHistory.where('fyId').equals(State.currentFY.id).reverse().sortBy('id');
+        records = records.slice(0, 200);
+        if (filter) {
+            const custs = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase().includes(filter)).toArray();
+            const ids = new Set(custs.map(c => c.id));
+            records = records.filter(r => ids.has(r.customerId));
+        }
+        const rows = [];
+        for (const r of records) {
+            const c = await db.customers.get(r.customerId);
+            rows.push({ ...r, custName: c ? c.customerName : '—' });
+        }
+        document.querySelector('#hist-table tbody').innerHTML = rows.map(r => `
+            <tr><td style="white-space:nowrap;">${r.changedAt}</td><td>${r.custName}</td><td>${r.changedBy}</td>
+            <td>${r.fieldName}</td><td style="color:var(--danger);">${r.oldValue || '—'}</td><td style="color:var(--success);">${r.newValue || '—'}</td></tr>`).join('') || '<tr><td colspan="6" class="text-center marathi">कोणतीही history नाही.</td></tr>';
+    }
+};
+
+// ==========================================
+// 15. SEARCH HISTORY & ACTIVITY LOG
+// ==========================================
+const SearchHistory = {
+    async render() {
+        const area = document.getElementById('content-area');
+        const records = await db.searchHistory.reverse().sortBy('id');
+        const top500 = records.slice(0, 500);
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🔍 Search History</h2>
+                <div style="overflow-x:auto; max-height: 500px;"><table class="data-table" id="sh-table"><thead><tr><th>#</th><th>Searched By</th><th>Query</th><th>Result Found</th><th>Date & Time</th></tr></thead><tbody></tbody></table></div>
+                <div class="flex justify-between items-center mt-4">
+                    <span class="marathi">Total: ${top500.length} records</span>
+                    <button class="btn btn-danger" onclick="App.SearchHistory.clear()">🗑 Clear History</button>
+                </div>
+            </div>`;
+        document.querySelector('#sh-table tbody').innerHTML = top500.map((r, i) => `
+            <tr><td>${i+1}</td><td>${r.searchedBy}</td><td>${r.searchQuery}</td><td>${r.resultName}</td><td>${r.searchedAt}</td></tr>`).join('');
+    },
+    async clear() {
+        if (!confirm('सगळा Search History delete करायचा?')) return;
+        await db.searchHistory.clear();
+        Utils.toast('Search history cleared.', 'success');
+        this.render();
+    }
+};
+
+const ActivityLog = {
+    async render() {
+        const area = document.getElementById('content-area');
+        const records = await db.activityLog.reverse().sortBy('id');
+        const top500 = records.slice(0, 500);
+        const logins = top500.filter(r => r.action === 'LOGIN').length;
+        const logouts = top500.filter(r => r.action === 'LOGOUT').length;
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">📊 Activity Log</h2>
+                <div style="overflow-x:auto; max-height: 500px;"><table class="data-table" id="al-table"><thead><tr><th>#</th><th>Username</th><th>Action</th><th>Date & Time</th></tr></thead><tbody></tbody></table></div>
+                <div class="mt-4 marathi" style="font-weight:600;">Total: ${top500.length} | 🟢 Logins: ${logins} | 🔴 Logouts: ${logouts}</div>
+            </div>`;
+        document.querySelector('#al-table tbody').innerHTML = top500.map((r, i) => {
+            const color = r.action === 'LOGIN' ? 'background:#d4edda;' : r.action === 'LOGOUT' ? 'background:#f8d7da;' : '';
+            return `<tr style="${color}"><td>${i+1}</td><td>${r.username}</td><td>${r.action}</td><td>${r.loggedAt}</td></tr>`;
+        }).join('');
+    }
+};
+
+// ==========================================
+// 16. GREETINGS (Bulk WhatsApp)
+// ==========================================
+const Greetings = {
+    templates: {
+        '🎨 Holi': 'Happy Holi! रंगांचा हा सण आपल्या जीवनात आनंद आणि रंग भरो. 🎨🌈',
+        '🪔 Diwali': 'Happy Diwali! दिपावलीच्या हार्दिक शुभेच्छा! 🪔✨',
+        '🎂 Birthday': 'Happy Birthday! वाढदिवसाच्या हार्दिक शुभेच्छा! 🎂🎉',
+        '🎊 New Year': 'Happy New Year! नवीन वर्षाच्या हार्दिक शुभेच्छा! 🎊🎆',
+        '🌙 Eid': 'Eid Mubarak! ईद मुबारक! 🌙⭐'
+    },
+    async render() {
+        const area = document.getElementById('content-area');
+        const customers = await db.customers.where('fyId').equals(State.currentFY.id).sortBy('customerName');
+        area.innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">🎉 Greetings — Bulk WhatsApp</h2>
+                <div class="mb-4">
+                    <label class="marathi font-bold" style="display:block; margin-bottom:0.5rem;">✏️ Message लिहा</label>
+                    <div class="flex gap-2 mb-2 flex-wrap">
+                        ${Object.entries(this.templates).map(([k, v]) => `<button class="btn btn-sm btn-ghost" onclick="document.getElementById('greet-msg').value = \`${v.replace(/`/g, '\\`')}\`">${k}</button>`).join('')}
+                    </div>
+                    <textarea id="greet-msg" class="input" rows="4"></textarea>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <button class="btn btn-sm btn-primary" onclick="App.Greetings.selectAll()">☑ Select All</button>
+                    <button class="btn btn-sm btn-ghost" onclick="App.Greetings.deselectAll()">☐ Deselect All</button>
+                    <span id="greet-count" class="marathi font-bold" style="align-self:center;">0 selected</span>
+                </div>
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);">
+                    <table class="data-table" id="greet-table"><thead><tr><th>☐</th><th>ID</th><th>Name</th><th>Contact</th><th>City</th></tr></thead><tbody>
+                        ${customers.map(c => `<tr>
+                            <td><input type="checkbox" class="greet-select" value="${c.id}" data-contact="${c.contactNo || ''}" onchange="App.Greetings.updateCount()"></td>
+                            <td>${c.id}</td><td class="font-bold">${c.customerName}</td><td>${c.contactNo || '—'}</td><td>${c.city || '—'}</td>
+                        </tr>`).join('')}
+                    </tbody></table>
+                </div>
+                <button class="btn btn-success mt-4 w-full" onclick="App.Greetings.sendAll()">💬 Send WhatsApp to All Selected</button>
+            </div>`;
+    },
+    selectAll() { document.querySelectorAll('.greet-select').forEach(cb => cb.checked = true); this.updateCount(); },
+    deselectAll() { document.querySelectorAll('.greet-select').forEach(cb => cb.checked = false); this.updateCount(); },
+    updateCount() { document.getElementById('greet-count').textContent = `${document.querySelectorAll('.greet-select:checked').length} selected`; },
+    async sendAll() {
+        const msg = document.getElementById('greet-msg').value.trim();
+        if (!msg) return Utils.toast('Message लिहा.', 'error');
+        const checked = document.querySelectorAll('.greet-select:checked');
+        if (checked.length === 0) return Utils.toast('कमीत कमी एक customer select करा.', 'error');
+        if (!confirm(`${checked.length} customers ला WhatsApp पाठवायचा? (Popup blocker allow करा)`)) return;
+        let sent = 0, failed = [];
+        for (const cb of checked) {
+            const phone = Utils.normalizePhone(cb.dataset.contact);
+            if (phone.length === 10) {
+                const c = await db.customers.get(parseInt(cb.value));
+                window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                sent++;
+                await new Promise(res => setTimeout(res, 500));
+            } else {
+                const c = await db.customers.get(parseInt(cb.value));
+                if (c) failed.push(c.customerName);
+            }
+        }
+        let result = `✅ ${sent} customers ला WhatsApp उघडले!`;
+        if (failed.length > 0) result += `\n⚠️ Invalid number (${failed.length}): ${failed.slice(0, 5).join(', ')}${failed.length > 5 ? ` +${failed.length-5} more` : ''}`;
+        alert(result);
+    }
+};
+
+// ==========================================
+// 17. DATA MANAGEMENT (Excel + Backup + Fix Dates)
+// ==========================================
+const Data = {
+    async exportExcel() {
+        const customers = await db.customers.where('fyId').equals(State.currentFY.id).toArray();
+        const banks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(customers.map(c => ({
+            "ID": c.id, "Customer Name": c.customerName, "Firm Name": c.firmName, "Contact No": c.contactNo,
+            "PAN Card No": c.panCardNo, "GST No": c.gstNo, "Aadhar No": c.aadharNo, "City": c.city,
+            "Date of Birth": c.dob, "Added By": c.addedBy, "Address": c.address
+        }))), "Customers");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(banks.map(b => ({
+            "Bank ID": b.id, "Customer ID": b.customerId, "Bank Name": b.bankName, "Account No": b.accountNo, "IFSC Code": b.ifscCode
+        }))), "Bank Accounts");
+        XLSX.writeFile(wb, `SmartLedger_${State.currentFY.label.replace(/ /g, '_')}.xlsx`);
+        Utils.toast('Excel Exported!', 'success');
+    },
+    async importExcel() {
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = '.xlsx, .xls';
+        input.onchange = async (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+                    let added = 0, skipped = 0;
+                    await db.transaction('rw', db.customers, async () => {
+                        for (const row of json) {
+                            let name = (row["Customer Name"] || "").toString().trim();
+                            if (!name && row["First Name"]) name = `${row["First Name"] || ""} ${row["Middle Name"] || ""} ${row["Last Name"] || ""}`.trim();
+                            if (!name || name.toLowerCase() === 'nan') { skipped++; continue; }
+                            const exists = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.customerName.toLowerCase() === name.toLowerCase()).first();
+                            if (exists) { skipped++; continue; }
+                            let dob = (row["Date of Birth"] || "").toString().trim();
+                            if (dob && !/^\d{2}-\d{2}-\d{4}$/.test(dob)) {
+                                const d = new Date(dob);
+                                if (!isNaN(d)) dob = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+                            }
+                            await db.customers.add({
+                                fyId: State.currentFY.id, customerName: name,
+                                firmName: (row["Firm Name"] || "").toString().trim(),
+                                contactNo: (row["Contact No"] || "").toString().trim(),
+                                panCardNo: (row["PAN Card No"] || "").toString().trim().toUpperCase(),
+                                gstNo: (row["GST No"] || "").toString().trim().toUpperCase(),
+                                aadharNo: (row["Aadhar No"] || "").toString().trim(),
+                                city: (row["City"] || "").toString().trim(), dob,
+                                addedBy: (row["Added By"] || State.currentUser.username).toString().trim(),
+                                address: (row["Address"] || "").toString().trim(),
+                                createdAt: Utils.todayStr()
+                            });
+                            added++;
+                        }
+                    });
+                    Utils.toast(`✅ ${added} added, ⚠️ ${skipped} skipped.`, 'success');
+                    Customers.renderView();
+                } catch (err) { Utils.toast('Import Error: ' + err.message, 'error'); }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        input.click();
+    },
+    downloadTemplate() {
+        const template = [{
+            "Customer Name": "Lucky Pandurang Dahivadkar", "Firm Name": "Dahivadkar Traders", "Contact No": "9876543210",
+            "PAN Card No": "ABCDE1234F", "GST No": "27ABCDE1234F1Z5", "Aadhar No": "1234 5678 9012",
+            "City": "Pune", "Date of Birth": "01-01-1980", "Added By": "ADMIN", "Address": "123, Main Road, Near Temple"
+        }];
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(template);
+        XLSX.utils.book_append_sheet(wb, ws, "Customers");
+        XLSX.writeFile(wb, "SmartLedger_Import_Template.xlsx");
+        setTimeout(() => {
+            alert("Template downloaded!\n\n📋 Format:\n• Row 1 = Column headers (बदलू नका!)\n• Row 2 = Sample entry (delete करा)\n• Row 3 onwards = तुमचा data भरा\n\n📌 Bank Accounts: Excel मध्ये bank details नाहीत. Software मधून Edit Customer → Add Bank Account करा.");
+        }, 500);
+    },
+    async fixOldDates() {
+        const customers = await db.customers.where('fyId').equals(State.currentFY.id).toArray();
+        let fixed = 0;
+        await db.transaction('rw', db.customers, async () => {
+            for (const c of customers) {
+                if (!c.dob || /^\d{2}-\d{2}-\d{4}$/.test(c.dob)) continue;
+                const d = new Date(c.dob);
+                if (!isNaN(d)) {
+                    const newDob = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+                    await db.customers.update(c.id, { dob: newDob });
+                    fixed++;
+                }
+            }
+        });
+        Utils.toast(fixed > 0 ? `${fixed} dates fixed!` : 'सगळ्या dates बरोबर आहेत.', 'success');
+    },
+    exportAdvancedSearch() {
+        if (!window.advSearchResults || window.advSearchResults.length === 0) return;
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.advSearchResults.map(c => ({
+            "ID": c.id, "Customer Name": c.customerName, "Firm Name": c.firmName, "Contact No": c.contactNo,
+            "City": c.city, "PAN Card No": c.panCardNo, "GST No": c.gstNo, "Added By": c.addedBy
+        }))), "Results");
+        XLSX.writeFile(wb, `AdvancedSearch_${State.currentFY.label.replace(/ /g, '_')}.xlsx`);
+        Utils.toast('Exported!', 'success');
+    }
+};
+
+// ==========================================
+// 18. BACKUP & RESTORE
+// ==========================================
+const Backup = {
+    async backupNow() {
+        const data = {
+            version: 1,
+            backupDate: Utils.nowStr(),
+            fyLabel: State.currentFY?.label,
+            users: await db.users.toArray(),
+            financialYears: await db.financialYears.toArray(),
+            customers: await db.customers.toArray(),
+            bankAccounts: await db.bankAccounts.toArray(),
+            statementRecords: await db.statementRecords.toArray(),
+            editHistory: await db.editHistory.toArray(),
+            customerNotes: await db.customerNotes.toArray(),
+            activityLog: await db.activityLog.toArray(),
+            searchHistory: await db.searchHistory.toArray()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `SmartLedger_Backup_${Utils.todayStr().replace(/-/g, '')}.json`;
+        a.click(); URL.revokeObjectURL(url);
+        await db.settings.put({ key: 'lastBackup', value: Date.now() });
+        Utils.toast('Backup downloaded!', 'success');
+    },
+    async restoreBackup() {
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = '.json';
+        input.onchange = async (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            if (!confirm('⚠️ सध्याचा सगळा data replace होईल. Continue?')) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    await db.transaction('rw', db.users, db.financialYears, db.customers, db.bankAccounts, db.statementRecords, db.editHistory, db.customerNotes, db.activityLog, db.searchHistory, async () => {
+                        await db.users.clear(); if (data.users) await db.users.bulkAdd(data.users);
+                        await db.financialYears.clear(); if (data.financialYears) await db.financialYears.bulkAdd(data.financialYears);
+                        await db.customers.clear(); if (data.customers) await db.customers.bulkAdd(data.customers);
+                        await db.bankAccounts.clear(); if (data.bankAccounts) await db.bankAccounts.bulkAdd(data.bankAccounts);
+                        await db.statementRecords.clear(); if (data.statementRecords) await db.statementRecords.bulkAdd(data.statementRecords);
+                        await db.editHistory.clear(); if (data.editHistory) await db.editHistory.bulkAdd(data.editHistory);
+                        await db.customerNotes.clear(); if (data.customerNotes) await db.customerNotes.bulkAdd(data.customerNotes);
+                        await db.activityLog.clear(); if (data.activityLog) await db.activityLog.bulkAdd(data.activityLog);
+                        await db.searchHistory.clear(); if (data.searchHistory) await db.searchHistory.bulkAdd(data.searchHistory);
+                    });
+                    Utils.toast('Backup restored! App reload होईल.', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) { Utils.toast('Restore Error: ' + err.message, 'error'); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    },
+    async checkReminder() {
+        const lastBackup = await db.settings.get('lastBackup');
+        if (!lastBackup || (Date.now() - lastBackup.value > 7 * 24 * 60 * 60 * 1000)) {
+            const banner = document.createElement('div');
+            banner.className = 'backup-banner';
+            banner.innerHTML = `<span class="marathi">⚠️ 7 दिवसांपासून backup घेतलेला नाही. कृपया backup घ्या.</span>
+                <button class="btn btn-sm btn-warning" onclick="App.Backup.backupNow(); this.parentElement.remove()">💾 Backup Now</button>`;
+            document.getElementById('content-area').prepend(banner);
+        }
+    }
+};
+
+// ==========================================
+// 19. DASHBOARD
+// ==========================================
+const Dashboard = {
+    async render() {
+        const area = document.getElementById('content-area');
+        const totalCust = await db.customers.where('fyId').equals(State.currentFY.id).count();
+        const today = Utils.todayStr().slice(0, 5);
+        const bdays = await db.customers.where('fyId').equals(State.currentFY.id).filter(c => c.dob && c.dob.startsWith(today)).toArray();
+        const monthStr = Utils.todayStr().slice(3, 10);
+        const editsMonth = await db.editHistory.where('fyId').equals(State.currentFY.id).filter(e => e.changedAt && e.changedAt.includes(monthStr.slice(3))).count();
+        const allBanks = await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray();
+        let pendingStmts = 0;
+        const custPendingMap = {};
+        for (const b of allBanks) {
+            const records = await db.statementRecords.where('bankAccountId').equals(b.id).toArray();
+            const pending = DocRequest.computePendingRanges(b, records);
+            if (pending.length > 0 && !b.isClosed) {
+                pendingStmts++;
+                custPendingMap[b.customerId] = (custPendingMap[b.customerId] || 0) + 1;
+            }
+        }
+        const topPending = Object.entries(custPendingMap).sort((a,b) => b[1]-a[1]).slice(0, 5);
+        const topPendingHtml = topPending.length > 0 ? await Promise.all(topPending.map(async ([cid, cnt]) => {
+            const c = await db.customers.get(parseInt(cid));
+            return c ? `<div class="flex justify-between p-2" style="border-bottom:1px solid var(--border);"><span>${c.customerName}</span><span class="font-bold" style="color:var(--danger);">${cnt} accounts</span></div>` : '';
+        })) : [];
+        
+        area.innerHTML = `
+            <h2 class="font-bold mb-4" style="font-size: 1.5rem; color: var(--accent);">📊 Dashboard — ${State.currentFY.label}</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="card" style="background: var(--accent); color: white; text-align: center;">
+                    <div style="font-size: 2rem;">👥</div><div style="font-size: 2rem; font-weight: bold;">${totalCust}</div><div class="marathi">Total Customers</div>
+                </div>
+                <div class="card" style="background: #e67e22; color: white; text-align: center;">
+                    <div style="font-size: 2rem;">🎂</div><div style="font-size: 2rem; font-weight: bold;">${bdays.length}</div><div class="marathi">Today Birthdays</div>
+                </div>
+                <div class="card" style="background: var(--success); color: white; text-align: center;">
+                    <div style="font-size: 2rem;">✏️</div><div style="font-size: 2rem; font-weight: bold;">${editsMonth}</div><div class="marathi">Edits This Month</div>
+                </div>
+                <div class="card" style="background: var(--danger); color: white; text-align: center;">
+                    <div style="font-size: 2rem;">📋</div><div style="font-size: 2rem; font-weight: bold;">${pendingStmts}</div><div class="marathi">Pending Statements</div>
+                </div>
+            </div>
+            ${bdays.length > 0 ? `<div class="card"><h3 class="font-bold mb-4 marathi" style="color: #e67e22;">🎂 आज Birthday असलेले Customers</h3>
+            ${bdays.map(b => `<div class="flex justify-between items-center p-2" style="border-bottom: 1px solid var(--border);">
+                <span>🎂 ${b.customerName} | 📞 ${b.contactNo || '—'} | DOB: ${b.dob}</span>
+                <button class="btn btn-success btn-sm" onclick="window.open('https://wa.me/91${Utils.normalizePhone(b.contactNo)}', '_blank')">💬 Wish</button>
+            </div>`).join('')}</div>` : ''}
+            ${topPending.length > 0 ? `<div class="card"><h3 class="font-bold mb-4 marathi" style="color: var(--danger);">📌 Top 5 Customers — Most Pending Statements</h3>
+            ${topPendingHtml.join('')}</div>` : ''}`;
+    }
+};
+
+// ==========================================
+// 20. SETTINGS
+// ==========================================
+const Settings = {
+    async renderChangePassword() {
+        document.getElementById('content-area').innerHTML = `
+            <div class="card" style="max-width: 500px;">
+                <h2 class="font-bold mb-4">🔒 Change Password</h2>
+                <p class="marathi mb-4" style="color: var(--text-secondary);">User: ${State.currentUser.username}</p>
+                <div class="flex flex-col gap-4">
+                    <input type="password" id="cp-old" class="input" placeholder="Old Password">
+                    <input type="password" id="cp-new" class="input" placeholder="New Password (min 4 chars)">
+                    <input type="password" id="cp-confirm" class="input" placeholder="Confirm New Password">
+                    <input type="text" id="cp-hint" class="input" placeholder="Hint (optional)">
+                    <button class="btn btn-primary" onclick="App.Settings.updatePassword()">Update Password</button>
+                </div>
+            </div>`;
+    },
+    async updatePassword() {
+        const oldPw = document.getElementById('cp-old').value;
+        const newPw = document.getElementById('cp-new').value;
+        const confirmPw = document.getElementById('cp-confirm').value;
+        const hint = document.getElementById('cp-hint').value;
+        if (State.currentUser.passwordHash !== await Utils.hashPassword(oldPw)) return Utils.toast('Incorrect old password.', 'error');
+        if (newPw.length < 4 || newPw !== confirmPw) return Utils.toast('Password requirements not met.', 'error');
+        await db.users.update(State.currentUser.id, { passwordHash: await Utils.hashPassword(newPw), hint });
+        Utils.toast('Password Changed!', 'success');
+        this.renderChangePassword();
+    },
+    async renderCreateUser() {
+        const users = await db.users.toArray();
+        document.getElementById('content-area').innerHTML = `
+            <div class="card">
+                <h2 class="font-bold mb-4">👤 Create User (Admin)</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <input type="text" id="new-uname" class="input" placeholder="Username" style="text-transform:uppercase;">
+                    <input type="password" id="new-pw" class="input" placeholder="Password (min 4)">
+                    <input type="text" id="new-hint" class="input" placeholder="Hint (optional)">
+                    <select id="new-role" class="input"><option value="user">User</option><option value="admin">Admin</option></select>
+                </div>
+                <button class="btn btn-success mb-4" onclick="App.Settings.createUser()">✅ Create User</button>
+                <h3 class="font-bold mb-2">Existing Users:</h3>
+                <table class="data-table"><thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Action</th></tr></thead><tbody>
+                    ${users.map(u => `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.role}</td><td>${u.username === 'ADMIN' || u.username === State.currentUser.username ? '<span style="color:var(--text-secondary);">—</span>' : `<button class="btn btn-sm btn-danger" onclick="App.Settings.deleteUser(${u.id}, '${u.username}')">🗑 Delete</button>`}</td></tr>`).join('')}
+                </tbody></table>
+            </div>`;
+    },
+    async createUser() {
+        const uname = document.getElementById('new-uname').value.trim().toUpperCase();
+        const pw = document.getElementById('new-pw').value;
+        const hint = document.getElementById('new-hint').value;
+        const role = document.getElementById('new-role').value;
+        if (!uname || !pw) return Utils.toast('Username आणि Password भरा.', 'error');
+        if (pw.length < 4) return Utils.toast('Password कमीत कमी 4 characters.', 'error');
+        const exists = await db.users.where('username').equals(uname).first();
+        if (exists) return Utils.toast(`Username '${uname}' आधीच आहे.`, 'error');
+        await db.users.add({ username: uname, passwordHash: await Utils.hashPassword(pw), role, hint });
+        Utils.toast(`User '${uname}' created!`, 'success');
+        this.renderCreateUser();
+    },
+    async deleteUser(id, uname) {
+        if (uname === 'ADMIN' || uname === State.currentUser.username) return Utils.toast('हे delete करता येत नाही.', 'error');
+        if (!confirm(`User '${uname}' delete करायचा?`)) return;
+        await db.users.delete(id);
+        Utils.toast('User deleted.', 'success');
+        this.renderCreateUser();
+    }
+};
+
+// ==========================================
+// 21. SNAKE GAME
+// ==========================================
+const SnakeGame = {
+    active: false,
+    init() {
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'g') { e.preventDefault(); this.start(); }
+        });
+    },
+    start() {
+        if (this.active) return; this.active = true;
+        const content = document.getElementById('generic-modal-content');
+        content.innerHTML = `
+            <div class="modal-header"><h3>🐍 SNAKE</h3><button class="btn btn-ghost" onclick="App.SnakeGame.stop()">✖</button></div>
+            <div class="modal-body text-center">
+                <p class="mb-4">Score: <span id="snake-score" class="font-bold">0</span> | Arrow Keys/WASD, P=Pause, R=Restart</p>
+                <canvas id="snake-canvas" width="360" height="324"></canvas>
+            </div>`;
+        App.UI.openModal('generic-modal');
+        this.run();
+    },
+    stop() {
+        this.active = false; if (this.interval) clearInterval(this.interval);
+        App.UI.closeModal('generic-modal');
+    },
+    run() {
+        const canvas = document.getElementById('snake-canvas');
+        const ctx = canvas.getContext('2d');
+        const CELL = 18, COLS = 20, ROWS = 18;
+        let snake = [{x:10, y:9}, {x:9, y:9}, {x:8, y:9}], dir = {x:1, y:0}, nextDir = {x:1, y:0};
+        let food = {x:15, y:15}, score = 0, speed = 160, paused = false;
+        const placeFood = () => { let valid = false; while (!valid) { food = {x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS)}; valid = !snake.some(s => s.x === food.x && s.y === food.y); } };
+        const draw = () => {
+            ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1e1e3a';
+            for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) ctx.fillRect(c*CELL+8, r*CELL+8, 2, 2);
+            ctx.fillStyle = '#ff3355'; ctx.fillRect(food.x*CELL+2, food.y*CELL+2, CELL-4, CELL-4);
+            snake.forEach((s, i) => { ctx.fillStyle = i === 0 ? '#00ff88' : (i < 4 ? '#00cc66' : '#009944'); ctx.fillRect(s.x*CELL+2, s.y*CELL+2, CELL-4, CELL-4); });
+        };
+        const step = () => {
+            if (paused) return;
+            dir = nextDir;
+            const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+            if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS || snake.some(s => s.x === head.x && s.y === head.y)) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ff3355'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 10);
+                ctx.fillStyle = '#fff'; ctx.font = '14px monospace'; ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2 + 15);
+                clearInterval(this.interval); return;
+            }
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score += 10; document.getElementById('snake-score').textContent = score;
+                if (score % 50 === 0 && speed > 60) { speed -= 15; clearInterval(this.interval); this.interval = setInterval(step, speed); }
+                placeFood();
+            } else { snake.pop(); }
+            draw();
+        };
+        document.addEventListener('keydown', (e) => {
+            if (!this.active) return;
+            const k = e.key.toLowerCase();
+            if ((k === 'arrowup' || k === 'w') && dir.y === 0) nextDir = {x:0, y:-1};
+            if ((k === 'arrowdown' || k === 's') && dir.y === 0) nextDir = {x:0, y:1};
+            if ((k === 'arrowleft' || k === 'a') && dir.x === 0) nextDir = {x:-1, y:0};
+            if ((k === 'arrowright' || k === 'd') && dir.x === 0) nextDir = {x:1, y:0};
+            if (k === 'p') paused = !paused;
+            if (k === 'r') { snake = [{x:10, y:9}, {x:9, y:9}, {x:8, y:9}]; dir = {x:1, y:0}; nextDir = {x:1, y:0}; score = 0; speed = 160; paused = false; document.getElementById('snake-score').textContent = 0; clearInterval(this.interval); this.interval = setInterval(step, speed); placeFood(); draw(); }
+        });
+        placeFood(); draw();
+        this.interval = setInterval(step, speed);
+    }
+};
+
+// ==========================================
+// 22. APP INIT
+// ==========================================
+const App = { Auth, FY, UI, Customers, Diary, Print, BankFilter, DocRequest, StatementTracker, Birthday, BankReport, EditHistory, SearchHistory, ActivityLog, Greetings, Data, Backup, Dashboard, Settings, SnakeGame };
+
+window.addEventListener('DOMContentLoaded', async () => {
+    await db.open();
+    await App.Auth.init();
+    App.SnakeGame.init();
+    let progress = 0;
+    const splashInterval = setInterval(() => {
+        progress += 5;
+        document.getElementById('splash-progress').style.width = `${progress}%`;
+        document.getElementById('splash-text').textContent = `Loading... ${progress}%`;
+        if (progress >= 100) {
+            clearInterval(splashInterval);
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-username').focus();
+        }
+    }, 50);
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await App.Auth.login(document.getElementById('login-username').value, document.getElementById('login-password').value);
+    });
+});
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+</script>
+<script id="bank-import-module">
+(function(){
+const BI={rows:[],file:'',bankCol:false};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const normName=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9\u0900-\u097F ]/g,' ').replace(/\s+/g,' ').trim();
+const phone10=s=>String(s||'').replace(/\D/g,'').slice(-10);
+const cleanAcc=s=>String(s||'').replace(/\s+/g,' ').trim();
+const cleanDash=s=>{s=String(s||'').trim();return s==='-'?'':s};
+const findKey=(row,re)=>Object.keys(row).find(k=>re.test(k.trim().toLowerCase()));
+BI.parse=json=>{
+ const out=[];let skipped=0;
+ json.forEach(r=>{
+  const kN=findKey(r,/^(customer\s*)?name$|customer name/),kP=findKey(r,/contact|mobile|phone/),kA=findKey(r,/a\/c|account\s*no|acc/),
+        kB=findKey(r,/^bank(\s*name)?$/),kI=findKey(r,/ifsc/),kF=findKey(r,/firm/),kC=findKey(r,/city/);
+  const name=String(r[kN]??'').trim(),acc=cleanAcc(r[kA]);
+  if(!name||!acc){skipped++;return}
+  out.push({name,phone:String(r[kP]??'').trim(),acc,bank:kB?String(r[kB]).trim():'',ifsc:kI?String(r[kI]).trim().toUpperCase():'',firm:cleanDash(r[kF]),city:cleanDash(r[kC])});
+ });
+ return{rows:out,skipped};
+};
+/* pure matching logic */
+BI.buildPlan=(rows,customers,accounts,opt)=>{
+ const byName=new Map(),byPhone=new Map();
+ customers.forEach(c=>{
+  const n=normName(c.customerName);if(n){if(!byName.has(n))byName.set(n,[]);byName.get(n).push(c)}
+  const p=phone10(c.contactNo);if(p.length===10){if(!byPhone.has(p))byPhone.set(p,[]);byPhone.get(p).push(c)}
+ });
+ const have=new Set(accounts.map(a=>`${a.customerId}|${normName(a.bankName)}|${cleanAcc(a.accountNo).toUpperCase()}`));
+ const groups=new Map();
+ rows.forEach(r=>{const k=normName(r.name)+'|'+phone10(r.phone);if(!groups.has(k))groups.set(k,{name:r.name,phone:r.phone,firm:r.firm,city:r.city,rows:[]});groups.get(k).rows.push(r)});
+ const plan=[];
+ groups.forEach(g=>{
+  let status='unmatched',cust=null;
+  const n=byName.get(normName(g.name))||[],p=phone10(g.phone),ph=byPhone.get(p)||[];
+  if(n.length===1){cust=n[0];status='matched'}
+  else if(n.length>1){const t=n.filter(c=>phone10(c.contactNo)===p);if(t.length===1){cust=t[0];status='matched'}else status='ambiguous'}
+  else if(p.length===10&&ph.length===1){cust=ph[0];status='by-contact'}
+  else if(ph.length>1)status='ambiguous';
+  if(!cust&&status==='unmatched'&&opt.createMissing)status='new';
+  const seen=new Set(),accs=[];
+  g.rows.forEach(r=>{
+   const bank=(opt.bank||r.bank||'').trim(),ak=cleanAcc(r.acc).toUpperCase();
+   const dupKey=`${cust?cust.id:'new:'+normName(g.name)}|${normName(bank)}|${ak}`;
+   const dup=seen.has(dupKey)||have.has(dupKey);seen.add(dupKey);
+   accs.push({acc:cleanAcc(r.acc),bank,ifsc:r.ifsc||opt.ifsc||'',dup});
+  });
+  plan.push({...g,status,cust,accs});
+ });
+ return plan;
+};
+const ST={matched:'✅ Matched','by-contact':'📞 Matched by contact',new:'🆕 Will create',unmatched:'❌ Not found',ambiguous:'⚠️ Duplicate names'};
+BI.pick=()=>{
+ if(!State.currentFY){Utils.toast('आधी Financial Year निवडा','error');return}
+ const input=document.createElement('input');input.type='file';input.accept='.xlsx,.xls';
+ input.onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+   try{
+    const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    const res=BI.parse(json);
+    if(!res.rows.length){Utils.toast('Excel मध्ये "Customer Name" आणि "A/C No" columns सापडले नाहीत','error');return}
+    BI.rows=res.rows;BI.skipped=res.skipped;BI.file=f.name;BI.bankCol=res.rows.some(r=>r.bank);
+    BI.step1();
+   }catch(err){Utils.toast('Excel वाचता आली नाही: '+err.message,'error')}
+  };
+  rd.readAsArrayBuffer(f);
+ };
+ input.click();
+};
+BI.step1=async()=>{
+ const banks=[...new Set((await db.bankAccounts.where('fyId').equals(State.currentFY.id).toArray()).map(b=>b.bankName).filter(Boolean))].sort();
+ const guess=BI.file.replace(/\.(xlsx|xls)$/i,'').replace(/^BankFilter[_\s-]*/i,'').replace(/_+/g,' ').replace(/\s+/g,' ').trim();
+ const names=new Set(BI.rows.map(r=>normName(r.name)));
+ const c=document.getElementById('generic-modal-content');
+ c.innerHTML=`<div class="modal-header"><h3>🏦 Bank Accounts Import</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+ <div class="modal-body marathi">
+  <p class="mb-4">File: <b>${esc(BI.file)}</b><br>${BI.rows.length} account rows, ${names.size} customers सापडले.${BI.skipped?` (${BI.skipped} रिकाम्या rows वगळल्या)`:''}</p>
+  ${BI.bankCol?'<p class="mb-4">✅ Excel मध्ये Bank Name column आहे, तेच वापरले जाईल.</p>':`<label style="display:block;margin-bottom:.4rem;font-weight:600">Bank चे नाव (या सर्व accounts साठी)</label>
+  <input class="input mb-2" id="bi-bank" list="bi-banks" value="${esc(guess)}"><datalist id="bi-banks">${banks.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+  <p class="mb-4" style="font-size:.82rem;color:var(--text-secondary)">⚠️ Bank Filter मध्ये नाव exact जुळले पाहिजे. आधीचे नाव असेल तर list मधून निवडा.</p>`}
+  <label style="display:block;margin-bottom:.4rem;font-weight:600">IFSC (optional)</label><input class="input mb-4" id="bi-ifsc" placeholder="उदा. BKID0000000">
+  <label class="flex items-center gap-2"><input type="checkbox" id="bi-create"> Software मध्ये customer नसेल तर नवीन बनवा</label>
+ </div>
+ <div class="modal-footer"><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button><button class="btn btn-primary" id="bi-prev">👀 Preview</button></div>`;
+ App.UI.openModal('generic-modal');
+ document.getElementById('bi-prev').onclick=()=>{
+  const bank=BI.bankCol?'':document.getElementById('bi-bank').value.trim();
+  if(!BI.bankCol&&!bank){Utils.toast('Bank चे नाव टाका','error');return}
+  BI.opt={bank,ifsc:document.getElementById('bi-ifsc').value.trim().toUpperCase(),createMissing:document.getElementById('bi-create').checked};
+  BI.step2();
+ };
+};
+BI.step2=async()=>{
+ const fy=State.currentFY.id;
+ const [cs,as]=await Promise.all([db.customers.where('fyId').equals(fy).toArray(),db.bankAccounts.where('fyId').equals(fy).toArray()]);
+ BI.plan=BI.buildPlan(BI.rows,cs,as,BI.opt);
+ const P=BI.plan,ok=P.filter(p=>p.status==='matched'||p.status==='by-contact'||p.status==='new');
+ const add=ok.reduce((n,p)=>n+p.accs.filter(a=>!a.dup).length,0),dup=ok.reduce((n,p)=>n+p.accs.filter(a=>a.dup).length,0);
+ const bad=P.filter(p=>!ok.includes(p));
+ const c=document.getElementById('generic-modal-content');
+ c.innerHTML=`<div class="modal-header"><h3>👀 Preview</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+ <div class="modal-body marathi">
+  <p class="mb-4">✅ <b>${ok.length}</b> customers मिळाले &nbsp;|&nbsp; ➕ <b>${add}</b> accounts जोडले जातील &nbsp;|&nbsp; ♻️ <b>${dup}</b> आधीपासून आहेत (वगळले) &nbsp;|&nbsp; ❌ <b>${bad.length}</b> customers जुळले नाहीत</p>
+  <div style="max-height:320px;overflow:auto"><table class="data-table"><thead><tr><th>Customer</th><th>Status</th><th>Accounts</th></tr></thead><tbody>
+  ${P.map(p=>`<tr><td>${esc(p.name)}<br><small>${esc(p.phone)}</small></td><td>${ST[p.status]}</td><td>${p.accs.map(a=>`<div style="${a.dup?'opacity:.5;text-decoration:line-through':''}">${esc(a.acc)}</div>`).join('')}</td></tr>`).join('')}
+  </tbody></table></div>
+  ${bad.length?'<p class="mt-4" style="font-size:.85rem">❌ जुळले नाहीत त्यांचे accounts जोडले जाणार नाहीत. नाव software मध्ये वेगळे असेल तर ते आधी दुरुस्त करा किंवा मागच्या step ला "नवीन बनवा" निवडा.</p>':''}
+ </div>
+ <div class="modal-footer"><button class="btn btn-ghost" id="bi-back">⬅ Back</button><button class="btn btn-success" id="bi-go" ${add||ok.some(p=>p.status==='new')?'':'disabled'}>✅ ${add} Accounts Import करा</button></div>`;
+ document.getElementById('bi-back').onclick=BI.step1;
+ document.getElementById('bi-go').onclick=BI.run;
+};
+BI.run=async()=>{
+ const btn=document.getElementById('bi-go');btn.disabled=true;btn.textContent='Importing...';
+ const fy=State.currentFY,user=State.currentUser.username,now=Utils.nowStr();let added=0,created=0;
+ try{
+  await db.transaction('rw',db.customers,db.bankAccounts,db.editHistory,db.activityLog,async()=>{
+   for(const p of BI.plan){
+    if(!['matched','by-contact','new'].includes(p.status))continue;
+    const todo=p.accs.filter(a=>!a.dup);if(!todo.length&&p.status!=='new')continue;
+    let id=p.cust&&p.cust.id;
+    if(p.status==='new'){
+     id=await db.customers.add({fyId:fy.id,customerName:p.name.trim(),firmName:p.firm||'',contactNo:p.phone||'',panCardNo:'',gstNo:'',aadharNo:'',city:p.city||'',dob:'',addedBy:user,address:'',createdAt:Utils.todayStr()});
+     created++;
+    }
+    for(const a of todo){
+     await db.bankAccounts.add({fyId:fy.id,customerId:id,bankName:a.bank,accountNo:a.acc,ifscCode:a.ifsc,expectedFrom:fy.startDate,expectedTo:fy.endDate,isClosed:false});
+     await db.editHistory.add({fyId:fy.id,customerId:id,changedBy:user,changedAt:now,fieldName:'Bank Account Added',oldValue:'',newValue:`${a.bank} | A/C: ${a.acc}`});
+     added++;
+    }
+   }
+   await db.activityLog.add({username:user,action:`Bank accounts imported from Excel: ${added} added (${BI.file})`,loggedAt:now});
+  });
+ }catch(err){Utils.toast('Import Error: '+err.message,'error');btn.disabled=false;return}
+ const bad=BI.plan.filter(p=>!['matched','by-contact','new'].includes(p.status));
+ document.getElementById('generic-modal-content').innerHTML=`<div class="modal-header"><h3>🎉 Import पूर्ण</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+ <div class="modal-body marathi"><p>➕ <b>${added}</b> bank accounts जोडले.${created?` 🆕 ${created} नवीन customers बनवले.`:''}</p>${bad.length?`<p class="mt-4">❌ जुळले नाहीत (${bad.length}): ${bad.map(p=>esc(p.name)).join(', ')}</p>`:''}</div>
+ <div class="modal-footer"><button class="btn btn-info" id="bi-rep">📥 Report (Excel)</button><button class="btn btn-primary" onclick="App.UI.closeModal('generic-modal')">Close</button></div>`;
+ document.getElementById('bi-rep').onclick=()=>{
+  const out=[];BI.plan.forEach(p=>p.accs.forEach(a=>out.push({'Customer':p.name,'Contact':p.phone,'Bank':a.bank,'A/C No':a.acc,'Result':['matched','by-contact','new'].includes(p.status)?(a.dup?'Already exists':'Added'):'Customer not found'})));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(out),'Report');XLSX.writeFile(wb,'BankImport_Report.xlsx');
+ };
+ Utils.toast(`✅ ${added} bank accounts imported`,'success');
+ try{App.Customers.renderView()}catch(e){}
+};
+App.Data.importBankAccounts=BI.pick;
+})();
+</script>
+<script id="cloud-auth">
+/* Cloud login: Supabase Auth + approval by admin. Replaces the old local-password code. */
+(function(){
+if(!window.SB)return;
+const sb=window.SB,A=App.Auth,S=App.Settings;
+const mail=u=>{u=String(u).trim();return u.includes('@')?u.toLowerCase():u.toLowerCase()+'@smartledger.app'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+A.init=async()=>{};
+A.login=async(username,password)=>{
+ const {data,error}=await sb.auth.signInWithPassword({email:mail(username),password});
+ if(error){Utils.toast('Invalid Username or Password!','error');return false}
+ const {data:p}=await sb.from('profiles').select('*').eq('id',data.user.id).maybeSingle();
+ if(!p||!p.approved){await sb.auth.signOut();Utils.toast('तुमचा user अजून Admin ने approve केलेला नाही.','error');return false}
+ State.currentUser={id:p.id,username:p.username,role:p.role,hint:p.hint||''};
+ await db.activityLog.add({username:p.username,action:'LOGIN',loggedAt:Utils.nowStr()});
+ Utils.toast(`Welcome, ${p.username}!`,'success');
+ App.FY.showSelection();return true;
+};
+const oldLogout=A.logout.bind(A);
+A.logout=async()=>{try{await oldLogout()}finally{await sb.auth.signOut()}};
+A.showForgotPassword=()=>alert('Password विसरलात?\n\nAdmin ला सांगा. Admin ला Supabase Dashboard → Authentication → Users मधून तुमचा password reset करता येतो.');
+A.showHint=A.resetPassword=()=>{};
+S.updatePassword=async()=>{
+ const v=id=>document.getElementById(id).value,oldPw=v('cp-old'),newPw=v('cp-new'),hint=v('cp-hint');
+ if(newPw.length<6||newPw!==v('cp-confirm'))return Utils.toast('नवीन password कमीत कमी 6 characters आणि confirm सारखा असावा.','error');
+ const {data:u}=await sb.auth.getUser();
+ const chk=await sb.auth.signInWithPassword({email:u.user.email,password:oldPw});
+ if(chk.error)return Utils.toast('Incorrect old password.','error');
+ const up=await sb.auth.updateUser({password:newPw});
+ if(up.error)return Utils.toast(up.error.message,'error');
+ await sb.rpc('set_my_hint',{h:hint});
+ Utils.toast('Password Changed!','success');S.renderChangePassword();
+};
+S.renderCreateUser=async()=>{
+ const {data:users,error}=await sb.from('profiles').select('*').order('username');
+ if(error)return Utils.toast(error.message,'error');
+ const me=State.currentUser;
+ document.getElementById('content-area').innerHTML=`<div class="card"><h2 class="font-bold mb-4">👤 Users (Admin)</h2>
+ <p class="marathi mb-4" style="color:var(--text-secondary)">नवीन user बनवण्यासाठी: Supabase Dashboard → Authentication → Users → <b>Add user</b> (Email: <code>username@smartledger.app</code>, "Auto Confirm User" टिक). मग इथे येऊन <b>Approve</b> करा. Login करताना फक्त username टाकायचा.</p>
+ <table class="data-table"><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>
+ ${users.map(u=>{const self=u.id===me.id;return `<tr><td>${esc(u.username)}</td>
+  <td>${self?u.role:`<select class="input" onchange="App.Settings.setRole('${u.id}',this.value)"><option value="user" ${u.role==='user'?'selected':''}>User</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select>`}</td>
+  <td>${u.approved?'✅ Approved':'⏳ Pending'}</td>
+  <td>${self?'—':`${u.approved?'':`<button class="btn btn-sm btn-success" onclick="App.Settings.approveUser('${u.id}')">Approve</button> `}<button class="btn btn-sm btn-danger" onclick="App.Settings.deleteUser('${u.id}','${esc(u.username)}')">Remove access</button>`}</td></tr>`}).join('')}
+ </tbody></table></div>`;
+};
+S.approveUser=async id=>{const r=await sb.from('profiles').update({approved:true}).eq('id',id);if(r.error)return Utils.toast(r.error.message,'error');Utils.toast('Approved','success');S.renderCreateUser()};
+S.setRole=async(id,role)=>{const r=await sb.from('profiles').update({role}).eq('id',id);Utils.toast(r.error?r.error.message:'Role updated',r.error?'error':'success')};
+S.deleteUser=async(id,u)=>{
+ if(!confirm(`'${u}' चा access काढायचा? (Login बंद होईल)`))return;
+ const r=await sb.from('profiles').delete().eq('id',id);
+ Utils.toast(r.error?r.error.message:'Access removed',r.error?'error':'success');S.renderCreateUser();
+};
+})();
+</script>
+</body>
+</html>
