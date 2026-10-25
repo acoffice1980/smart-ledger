@@ -816,7 +816,7 @@ const UI = {
             ]},
             { label: '⚙️ Settings', items: [
                 { label: '🔒 Change Password', action: 'App.Settings.renderChangePassword()' },
-                ...(isAdmin ? [{ label: '👤 Users', action: 'App.Settings.renderCreateUser()' }] : [])
+                ...(isAdmin ? [{ label: '👤 Create User', action: 'App.Settings.renderCreateUser()' }] : [])
             ]}
         ];
         nav.innerHTML = groups.map(g => {
@@ -2731,18 +2731,25 @@ App.Data.importBankAccounts=BI.pick;
 })();
 </script>
 <script id="cloud-auth">
-/* Cloud login: Supabase Auth + approval by admin. Replaces the old local-password code. */
+/* Cloud login: Supabase Auth. Default ADMIN / 1980 auto-created on first login. Admin can create users in-app. */
 (function(){
 if(!window.SB)return;
 const sb=window.SB,A=App.Auth,S=App.Settings;
 const mail=u=>{u=String(u).trim();return u.includes('@')?u.toLowerCase():u.toLowerCase()+'@smartledger.app'};
+const tf=p=>String(p)+'@Ledger!';   // lets short passwords (e.g. 1980) pass Supabase's 6-character minimum
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fail=m=>Utils.toast(m,'error');
 A.init=async()=>{};
 A.login=async(username,password)=>{
- const {data,error}=await sb.auth.signInWithPassword({email:mail(username),password});
- if(error){Utils.toast('Invalid Username or Password!','error');return false}
+ let {data,error}=await sb.auth.signInWithPassword({email:mail(username),password:tf(password)});
+ if(error&&/^admin$/i.test(username.trim())&&password==='1980'&&/invalid/i.test(error.message)){
+  const su=await sb.auth.signUp({email:mail('ADMIN'),password:tf('1980')});
+  if(!su.error&&su.data.session&&su.data.user&&su.data.user.identities&&su.data.user.identities.length){data=su.data;error=null}
+  else if(!su.error&&!su.data.session){fail('Supabase मध्ये "Confirm email" OFF करा (Authentication → Sign In / Providers → Email).');return false}
+ }
+ if(error){fail(/confirm/i.test(error.message)?'Supabase मध्ये "Confirm email" OFF करा.':'Invalid Username or Password!');return false}
  const {data:p}=await sb.from('profiles').select('*').eq('id',data.user.id).maybeSingle();
- if(!p||!p.approved){await sb.auth.signOut();Utils.toast('तुमचा user अजून Admin ने approve केलेला नाही.','error');return false}
+ if(!p||!p.approved){await sb.auth.signOut();fail('हा user अजून approve नाही. Admin ला सांगा.');return false}
  State.currentUser={id:p.id,username:p.username,role:p.role,hint:p.hint||''};
  await db.activityLog.add({username:p.username,action:'LOGIN',loggedAt:Utils.nowStr()});
  Utils.toast(`Welcome, ${p.username}!`,'success');
@@ -2750,38 +2757,63 @@ A.login=async(username,password)=>{
 };
 const oldLogout=A.logout.bind(A);
 A.logout=async()=>{try{await oldLogout()}finally{await sb.auth.signOut()}};
-A.showForgotPassword=()=>alert('Password विसरलात?\n\nAdmin ला सांगा. Admin ला Supabase Dashboard → Authentication → Users मधून तुमचा password reset करता येतो.');
+A.showForgotPassword=()=>alert('Password विसरलात?\n\nAdmin ला सांगा. Admin → Settings → Users मधून तुमचा password reset करेल.');
 A.showHint=A.resetPassword=()=>{};
 S.updatePassword=async()=>{
  const v=id=>document.getElementById(id).value,oldPw=v('cp-old'),newPw=v('cp-new'),hint=v('cp-hint');
- if(newPw.length<6||newPw!==v('cp-confirm'))return Utils.toast('नवीन password कमीत कमी 6 characters आणि confirm सारखा असावा.','error');
+ if(newPw.length<4||newPw!==v('cp-confirm'))return fail('नवीन password कमीत कमी 4 characters आणि confirm सारखा असावा.');
  const {data:u}=await sb.auth.getUser();
- const chk=await sb.auth.signInWithPassword({email:u.user.email,password:oldPw});
- if(chk.error)return Utils.toast('Incorrect old password.','error');
- const up=await sb.auth.updateUser({password:newPw});
- if(up.error)return Utils.toast(up.error.message,'error');
+ if((await sb.auth.signInWithPassword({email:u.user.email,password:tf(oldPw)})).error)return fail('Incorrect old password.');
+ const up=await sb.auth.updateUser({password:tf(newPw)});
+ if(up.error)return fail(up.error.message);
  await sb.rpc('set_my_hint',{h:hint});
  Utils.toast('Password Changed!','success');S.renderChangePassword();
 };
 S.renderCreateUser=async()=>{
  const {data:users,error}=await sb.from('profiles').select('*').order('username');
- if(error)return Utils.toast(error.message,'error');
+ if(error)return fail(error.message);
  const me=State.currentUser;
- document.getElementById('content-area').innerHTML=`<div class="card"><h2 class="font-bold mb-4">👤 Users (Admin)</h2>
- <p class="marathi mb-4" style="color:var(--text-secondary)">नवीन user बनवण्यासाठी: Supabase Dashboard → Authentication → Users → <b>Add user</b> (Email: <code>username@smartledger.app</code>, "Auto Confirm User" टिक). मग इथे येऊन <b>Approve</b> करा. Login करताना फक्त username टाकायचा.</p>
+ document.getElementById('content-area').innerHTML=`<div class="card"><h2 class="font-bold mb-4">👤 Create User (Admin)</h2>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+  <input type="text" id="new-uname" class="input" placeholder="Username" style="text-transform:uppercase">
+  <input type="password" id="new-pw" class="input" placeholder="Password (min 4)">
+  <input type="text" id="new-hint" class="input" placeholder="Hint (optional)">
+  <select id="new-role" class="input"><option value="user">User</option><option value="admin">Admin</option></select></div>
+ <button class="btn btn-success mb-4" onclick="App.Settings.createUser()">✅ Create User</button>
+ <h3 class="font-bold mb-2">Existing Users:</h3>
  <table class="data-table"><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>
  ${users.map(u=>{const self=u.id===me.id;return `<tr><td>${esc(u.username)}</td>
   <td>${self?u.role:`<select class="input" onchange="App.Settings.setRole('${u.id}',this.value)"><option value="user" ${u.role==='user'?'selected':''}>User</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select>`}</td>
-  <td>${u.approved?'✅ Approved':'⏳ Pending'}</td>
-  <td>${self?'—':`${u.approved?'':`<button class="btn btn-sm btn-success" onclick="App.Settings.approveUser('${u.id}')">Approve</button> `}<button class="btn btn-sm btn-danger" onclick="App.Settings.deleteUser('${u.id}','${esc(u.username)}')">Remove access</button>`}</td></tr>`}).join('')}
+  <td>${u.approved?'✅ Active':'⏳ Pending'}</td>
+  <td>${self?'—':`${u.approved?'':`<button class="btn btn-sm btn-success" onclick="App.Settings.approveUser('${u.id}')">Approve</button> `}<button class="btn btn-sm btn-warning" onclick="App.Settings.resetUserPw('${u.id}','${esc(u.username)}')">🔑 Reset</button> <button class="btn btn-sm btn-danger" onclick="App.Settings.deleteUser('${u.id}','${esc(u.username)}')">🗑</button>`}</td></tr>`}).join('')}
  </tbody></table></div>`;
 };
-S.approveUser=async id=>{const r=await sb.from('profiles').update({approved:true}).eq('id',id);if(r.error)return Utils.toast(r.error.message,'error');Utils.toast('Approved','success');S.renderCreateUser()};
-S.setRole=async(id,role)=>{const r=await sb.from('profiles').update({role}).eq('id',id);Utils.toast(r.error?r.error.message:'Role updated',r.error?'error':'success')};
+S.createUser=async()=>{
+ const g=id=>document.getElementById(id).value,uname=g('new-uname').trim().toUpperCase(),pw=g('new-pw'),hint=g('new-hint'),role=g('new-role');
+ if(!uname||!pw)return fail('Username आणि Password भरा.');
+ if(pw.length<4)return fail('Password कमीत कमी 4 characters.');
+ if(/[^A-Z0-9._-]/.test(uname))return fail('Username मध्ये फक्त English letters, numbers आणि . _ - चालतात.');
+ const tmp=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+ const {data,error}=await tmp.auth.signUp({email:mail(uname),password:tf(pw)});
+ if(error)return fail(/registered/i.test(error.message)?`Username '${uname}' आधीच आहे.`:error.message);
+ if(!data.user||!data.user.identities||!data.user.identities.length)return fail(`Username '${uname}' आधीच आहे.`);
+ if(!data.session)Utils.toast('Supabase मध्ये "Confirm email" OFF नसेल तर हा user login करू शकणार नाही.','info');
+ const r=await sb.from('profiles').update({approved:true,role,hint}).eq('id',data.user.id);
+ if(r.error)return fail(r.error.message);
+ Utils.toast(`User '${uname}' created!`,'success');S.renderCreateUser();
+};
+S.approveUser=async id=>{const r=await sb.from('profiles').update({approved:true}).eq('id',id);r.error?fail(r.error.message):Utils.toast('Approved','success');S.renderCreateUser()};
+S.setRole=async(id,role)=>{const r=await sb.from('profiles').update({role}).eq('id',id);r.error?fail(r.error.message):Utils.toast('Role updated','success')};
+S.resetUserPw=async(id,u)=>{
+ const pw=prompt(`'${u}' साठी नवीन password (min 4):`);if(pw===null)return;
+ if(pw.length<4)return fail('Password कमीत कमी 4 characters.');
+ const r=await sb.rpc('admin_set_password',{target:id,new_password:tf(pw)});
+ r.error?fail('Reset झाला नाही: '+r.error.message+' (supabase_update.sql run केले का?)'):Utils.toast(`'${u}' चा password बदलला.`,'success');
+};
 S.deleteUser=async(id,u)=>{
- if(!confirm(`'${u}' चा access काढायचा? (Login बंद होईल)`))return;
- const r=await sb.from('profiles').delete().eq('id',id);
- Utils.toast(r.error?r.error.message:'Access removed',r.error?'error':'success');S.renderCreateUser();
+ if(!confirm(`User '${u}' कायमचा delete करायचा?`))return;
+ const r=await sb.rpc('admin_delete_user',{target:id});
+ r.error?fail('Delete झाला नाही: '+r.error.message):Utils.toast('User deleted.','success');S.renderCreateUser();
 };
 })();
 </script>
