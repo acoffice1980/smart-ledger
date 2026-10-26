@@ -227,6 +227,21 @@ html.no-anim *,html.no-anim *::before{animation:none!important;transition:none!i
 html.no-orbs .bg-orbs{display:none}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
+<style id="perf-css">
+/* ===== PERFORMANCE LAYER ===== */
+body{animation:none!important;background-size:100% 100%!important;background-attachment:fixed}
+.bg-orbs i{filter:none!important;will-change:transform}
+.card,.fy-card,.bank-stmt-card,.status-bar,.topbar,.sidebar,.picker-list,.autocomplete-list,.data-table th{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.card:hover{transform:none!important;box-shadow:var(--shadow)!important}
+.data-table tr:hover{transform:none!important}
+.fy-badge{animation:none!important}
+.auth-container{animation:rise .8s cubic-bezier(.2,.8,.2,1) both!important}
+.ts-sw b{animation:none!important}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+html.perf *,html.perf *::before,html.perf *::after{animation:none!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html.perf .bg-orbs{display:none}
+html.perf #content-area>*{opacity:1!important}
+</style>
 <script id="glass-theme-engine">
 (function(){
 const THEMES={
@@ -242,8 +257,9 @@ lavender:{n:'Lavender',a1:'#7c3aed',a2:'#ec4899',b:['#f5f3ff','#ede9fe','#fae8ff
 mint:{n:'Mint',a1:'#14b8a6',a2:'#3b82f6',b:['#ecfdf5','#ccfbf1','#dbeafe'],d:0}
 };
 const KEY='smartledger_glass_theme';
-let S={id:'aurora',c:{a1:'#ff6b6b',a2:'#feca57',b1:'#2d1b4e',b2:'#1b3a5c'},blur:18,spd:1,orbs:1,anim:1};
+let S={id:'aurora',c:{a1:'#ff6b6b',a2:'#feca57',b1:'#2d1b4e',b2:'#1b3a5c'},blur:18,spd:1,orbs:1,anim:1,perf:-1};
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+if(S.perf===-1)S.perf=1;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const hex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
@@ -269,7 +285,7 @@ function apply(){
  set('--modal-bg',d?mix(t.b[0],'#ffffff',.1):'#ffffff');set('--modal-bg-solid',d?mix(t.b[0],'#ffffff',.1):'#ffffff');
  set('--blur',S.blur+'px');set('--spd',S.spd);
  const h=document.documentElement;h.setAttribute('data-mode',d?'dark':'light');h.setAttribute('data-theme','');
- h.classList.toggle('no-anim',!S.anim);h.classList.toggle('no-orbs',!S.orbs);
+ h.classList.toggle('perf',!!S.perf);h.classList.toggle('no-anim',!S.anim);h.classList.toggle('no-orbs',!S.orbs);
 }
 apply();
 function build(){
@@ -287,6 +303,7 @@ function build(){
  <div class="ts-row"><span>Glass blur</span><input type="range" id="e-blur" min="0" max="40"></div>
  <div class="ts-row"><span>Animation speed</span><input type="range" id="e-spd" min="0.4" max="2" step="0.1"></div>
  <div class="ts-row"><span>Floating glow orbs</span><input type="checkbox" id="e-orbs"></div>
+ <div class="ts-row"><span>⚡ Performance mode (fast)</span><input type="checkbox" id="e-perf"></div>
  <div class="ts-row"><span>Animations</span><input type="checkbox" id="e-anim"></div>
  <button class="btn btn-ghost w-full mt-4" id="e-reset">↺ Reset</button></aside>`;
  document.body.appendChild(ov);
@@ -294,7 +311,7 @@ function build(){
  const sync=()=>{
   g.innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="ts-sw ${S.id===k?'on':''}" data-k="${k}"><b style="background-image:linear-gradient(135deg,${t.b[0]},${t.a1},${t.a2},${t.b[2]})"></b><span>${t.n}</span></button>`).join('');
   const q=i=>ov.querySelector(i);q('#c-a1').value=S.c.a1;q('#c-a2').value=S.c.a2;q('#c-b1').value=S.c.b1;q('#c-b2').value=S.c.b2;
-  q('#e-blur').value=S.blur;q('#e-spd').value=S.spd;q('#e-orbs').checked=!!S.orbs;q('#e-anim').checked=!!S.anim;
+  q('#e-blur').value=S.blur;q('#e-spd').value=S.spd;q('#e-orbs').checked=!!S.orbs;q('#e-anim').checked=!!S.anim;q('#e-perf').checked=!!S.perf;
  };
  const q=i=>ov.querySelector(i);
  g.onclick=e=>{const b=e.target.closest('.ts-sw');if(!b)return;S.id=b.dataset.k;apply();save();sync()};
@@ -303,8 +320,9 @@ function build(){
  q('#e-blur').oninput=e=>{S.blur=+e.target.value;apply();save()};
  q('#e-spd').oninput=e=>{S.spd=+e.target.value;apply();save()};
  q('#e-orbs').onchange=e=>{S.orbs=e.target.checked?1:0;apply();save()};
+ q('#e-perf').onchange=e=>{S.perf=e.target.checked?1:0;apply();save()};
  q('#e-anim').onchange=e=>{S.anim=e.target.checked?1:0;apply();save()};
- q('#e-reset').onclick=()=>{S={id:'aurora',c:S.c,blur:18,spd:1,orbs:1,anim:1};apply();save();sync()};
+ q('#e-reset').onclick=()=>{S={id:'aurora',c:S.c,blur:18,spd:1,orbs:1,anim:1,perf:1};apply();save();sync()};
  const close=()=>ov.classList.remove('open');
  q('#ts-x').onclick=close;ov.addEventListener('click',e=>{if(e.target===ov)close()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
@@ -343,12 +361,21 @@ const chk=({data,error})=>{if(error)throw new Error(error.message);return data};
 const pick=(name,o)=>{const ok=COLS[name],r={};for(const k in o){if(o[k]===undefined)continue;if(ok.includes(k))r[k]=o[k];else console.warn('Ignored unknown field',name,k)}return r};
 const chunks=(a,n)=>{const r=[];for(let i=0;i<a.length;i+=n)r.push(a.slice(i,i+n));return r};
 const cmp=(a,b)=>a<b?-1:a>b?1:0;
+const CACHE=new Map(),TTL=20000;
+const bust=t=>{for(const k of [...CACHE.keys()])if(k.startsWith(t+'|'))CACHE.delete(k)};
+sb.auth.onAuthStateChange(()=>CACHE.clear());
 class Col{
  constructor(t,f=[],p=[],ord=null,rev=false){this.t=t;this.f=f;this.p=p;this.ord=ord;this.rev=rev}
  _c(o){return Object.assign(new Col(this.t,this.f,this.p,this.ord,this.rev),o)}
  and(fn){return this._c({p:[...this.p,fn]})} filter(fn){return this.and(fn)}
  reverse(){return this._c({rev:!this.rev})}
  async _page(filters){
+  const t=this.t,key=t.tbl+'|'+(this.ord||'')+'|'+JSON.stringify(filters),now=Date.now();
+  let e=CACHE.get(key);
+  if(!e||now-e.ts>TTL){e={ts:now,p:this._fetch(filters)};CACHE.set(key,e);e.p.catch(()=>{if(CACHE.get(key)===e)CACHE.delete(key)})}
+  return structuredClone(await e.p);
+ }
+ async _fetch(filters){
   const t=this.t,out=[],step=1000;let from=0;
   for(;;){
    let q=sb.from(t.tbl).select('*');
@@ -377,7 +404,7 @@ class Col{
  async delete(){
   const t=this.t,ids=(await this._rows()).map(r=>r[t.pk]);
   for(const part of chunks(ids,150))chk(await sb.from(t.tbl).delete().in(t.pk,part));
-  return ids.length;
+  bust(t.tbl);return ids.length;
  }
  async modify(ch){
   const t=this.t,rows=await this._rows();
@@ -387,7 +414,7 @@ class Col{
    const d=pick(t.name,ch);
    for(const part of chunks(rows.map(r=>r[t.pk]),150))chk(await sb.from(t.tbl).update(d).in(t.pk,part));
   }
-  return rows.length;
+  bust(t.tbl);return rows.length;
  }
 }
 class Tbl{
@@ -395,14 +422,16 @@ class Tbl{
  where(f){return{equals:v=>new Col(this,[[f,'eq',v]]),notEqual:v=>new Col(this,[[f,'neq',v]]),anyOf:a=>new Col(this,[[f,'in',[...a]]])}}
  orderBy(f){return new Col(this,[],[],f)} reverse(){return new Col(this,[],[],null,true)}
  toArray(){return new Col(this).toArray()}
- async add(o){const d=chk(await sb.from(this.tbl).insert(pick(this.name,o)).select(this.pk).single());return d[this.pk]}
+ async add(o){const d=chk(await sb.from(this.tbl).insert(pick(this.name,o)).select(this.pk).single());bust(this.tbl);return d[this.pk]}
  async get(k){const d=chk(await sb.from(this.tbl).select('*').eq(this.pk,k).maybeSingle());return d||undefined}
- async put(o){o=pick(this.name,o);chk(await sb.from(this.tbl).upsert(o));return o[this.pk]}
- async update(k,ch){chk(await sb.from(this.tbl).update(pick(this.name,ch)).eq(this.pk,k));return 1}
- async delete(k){chk(await sb.from(this.tbl).delete().eq(this.pk,k))}
- async clear(){chk(await sb.from(this.tbl).delete().not(this.pk,'is',null))}
+ async put(o){o=pick(this.name,o);chk(await sb.from(this.tbl).upsert(o));bust(this.tbl);return o[this.pk]}
+ async update(k,ch){chk(await sb.from(this.tbl).update(pick(this.name,ch)).eq(this.pk,k));bust(this.tbl);return 1}
+ async delete(k){chk(await sb.from(this.tbl).delete().eq(this.pk,k));bust(this.tbl)}
+ async clear(){chk(await sb.from(this.tbl).delete().not(this.pk,'is',null));bust(this.tbl)}
  async bulkAdd(arr){
+  bust(this.tbl);
   for(const part of chunks(arr.map(o=>pick(this.name,o)),500))chk(await sb.from(this.tbl).insert(part));
+  bust(this.tbl);
   if(this.pk==='id')chk(await sb.rpc('reset_sequences'));
  }
 }
@@ -2696,7 +2725,7 @@ BI.step2=async()=>{
 };
 BI.run=async()=>{
  const btn=document.getElementById('bi-go');btn.disabled=true;btn.textContent='Importing...';
- const fy=State.currentFY,user=State.currentUser.username,now=Utils.nowStr();let added=0,created=0;
+ const fy=State.currentFY,user=State.currentUser.username,now=Utils.nowStr();let added=0,created=0;const accRows=[],histRows=[];
  try{
   await db.transaction('rw',db.customers,db.bankAccounts,db.editHistory,db.activityLog,async()=>{
    for(const p of BI.plan){
@@ -2708,11 +2737,13 @@ BI.run=async()=>{
      created++;
     }
     for(const a of todo){
-     await db.bankAccounts.add({fyId:fy.id,customerId:id,bankName:a.bank,accountNo:a.acc,ifscCode:a.ifsc,expectedFrom:fy.startDate,expectedTo:fy.endDate,isClosed:false});
-     await db.editHistory.add({fyId:fy.id,customerId:id,changedBy:user,changedAt:now,fieldName:'Bank Account Added',oldValue:'',newValue:`${a.bank} | A/C: ${a.acc}`});
+     accRows.push({fyId:fy.id,customerId:id,bankName:a.bank,accountNo:a.acc,ifscCode:a.ifsc,expectedFrom:fy.startDate,expectedTo:fy.endDate,isClosed:false});
+     histRows.push({fyId:fy.id,customerId:id,changedBy:user,changedAt:now,fieldName:'Bank Account Added',oldValue:'',newValue:`${a.bank} | A/C: ${a.acc}`});
      added++;
     }
    }
+   if(accRows.length)await db.bankAccounts.bulkAdd(accRows);
+   if(histRows.length)await db.editHistory.bulkAdd(histRows);
    await db.activityLog.add({username:user,action:`Bank accounts imported from Excel: ${added} added (${BI.file})`,loggedAt:now});
   });
  }catch(err){Utils.toast('Import Error: '+err.message,'error');btn.disabled=false;return}
@@ -2823,6 +2854,141 @@ S.deleteUser=async(id,u)=>{
  const r=await sb.rpc('admin_delete_user',{target:id});
  r.error?fail('Delete झाला नाही: '+r.error.message):Utils.toast('User deleted.','success');S.renderCreateUser();
 };
+})();
+</script>
+<script id="customer-import">
+/* Customer Excel import (cloud-safe): one fetch, bulk insert, optional update of existing customers, clear report. */
+(function(){
+const CI={};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9\u0900-\u097F ]/g,' ').replace(/\s+/g,' ').trim();
+const p10=s=>String(s||'').replace(/\D/g,'').slice(-10);
+const dash=s=>{s=String(s??'').trim();return(s==='-'||s.toLowerCase()==='nan'||s.toLowerCase()==='none')?'':s};
+const ALIAS={firmName:['firm name','firm'],contactNo:['contact no','contact','mobile','mobile no','phone','contact number'],panCardNo:['pan card no','pan no','pan'],gstNo:['gst no','gstin','gst'],aadharNo:['aadhar no','aadhaar no','aadhar','aadhaar'],city:['city'],dob:['date of birth','dob'],addedBy:['added by'],address:['address']};
+const FIELDS=Object.keys(ALIAS);
+const get=(row,names)=>{const k=Object.keys(row).find(k=>names.includes(k.trim().toLowerCase()));return k===undefined?'':row[k]};
+const fmtDob=v=>{
+ if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+43200000);return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`}
+ let s=dash(v);if(s&&!/^\d{2}-\d{2}-\d{4}$/.test(s)){const d=new Date(s);if(!isNaN(d))s=`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`}
+ return s;
+};
+CI.parse=(json,user)=>{
+ const out=[];
+ json.forEach((r,i)=>{
+  let name=dash(get(r,['customer name','name']));
+  if(!name){const f=get(r,['first name']);if(f)name=[f,get(r,['middle name']),get(r,['last name'])].map(dash).filter(Boolean).join(' ')}
+  const o={line:i+2,name:name.trim()};
+  FIELDS.forEach(f=>{o[f]=f==='dob'?fmtDob(get(r,ALIAS[f])):dash(get(r,ALIAS[f]))});
+  o.panCardNo=o.panCardNo.toUpperCase();o.gstNo=o.gstNo.toUpperCase();
+  if(!o.addedBy)o.addedBy=user;
+  out.push(o);
+ });
+ return out;
+};
+CI.buildPlan=(rows,existing,opt)=>{
+ const byName=new Map(),byPhone=new Map();
+ existing.forEach(c=>{const n=norm(c.customerName);if(n){if(!byName.has(n))byName.set(n,[]);byName.get(n).push(c)}
+  const p=p10(c.contactNo);if(p.length===10){if(!byPhone.has(p))byPhone.set(p,[]);byPhone.get(p).push(c)}});
+ const seen=new Set(),plan=[];
+ rows.forEach(r=>{
+  const n=norm(r.name);
+  if(!n)return plan.push({r,st:'blank'});
+  if(seen.has(n))return plan.push({r,st:'dupfile'});
+  seen.add(n);
+  const m=byName.get(n)||[];
+  if(m.length>1)return plan.push({r,st:'ambiguous'});
+  if(m.length===1){
+   const c=m[0],ch={};
+   FIELDS.forEach(f=>{if(f==='addedBy')return;const nv=r[f],ov=String(c[f]??'').trim();
+    if(nv&&nv!==ov&&(opt.overwrite||!ov))ch[f]=nv});
+   return plan.push({r,c,ch,st:Object.keys(ch).length?'update':'same'});
+  }
+  const ph=byPhone.get(p10(r.contactNo))||[];
+  if(p10(r.contactNo).length===10&&ph.length)return plan.push({r,c:ph[0],st:'phone'});
+  plan.push({r,st:'new'});
+ });
+ return plan;
+};
+const ST={new:'🆕 नवीन',update:'🔄 Update',same:'✔️ आधीपासून (बदल नाही)',blank:'⛔ नाव रिकामे',dupfile:'♻️ Excel मध्ये दोनदा',ambiguous:'⚠️ Software मध्ये एकच नाव दोनदा',phone:'📞 नाव वेगळे, mobile सारखा (skip)'};
+CI.pick=()=>{
+ if(!State.currentFY){Utils.toast('आधी Financial Year निवडा','error');return}
+ const input=document.createElement('input');input.type='file';input.accept='.xlsx,.xls';
+ input.onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=async ev=>{
+   try{
+    const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    CI.rows=CI.parse(json,State.currentUser.username);CI.file=f.name;
+    CI.existing=await db.customers.where('fyId').equals(State.currentFY.id).toArray();
+    CI.show(false);
+   }catch(err){Utils.toast('Excel वाचता आली नाही: '+err.message,'error')}
+  };
+  rd.readAsArrayBuffer(f);
+ };
+ input.click();
+};
+CI.show=overwrite=>{
+ CI.plan=CI.buildPlan(CI.rows,CI.existing,{overwrite});CI.ow=overwrite;
+ const P=CI.plan,c=k=>P.filter(p=>p.st===k).length;
+ const c0=document.getElementById('generic-modal-content');
+ c0.innerHTML=`<div class="modal-header"><h3>📥 Customers Import — Preview</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+ <div class="modal-body marathi">
+  <p class="mb-2">File: <b>${esc(CI.file)}</b> — ${CI.rows.length} rows, software मध्ये सध्या ${CI.existing.length} customers.</p>
+  <p class="mb-4">🆕 नवीन <b>${c('new')}</b> &nbsp;|&nbsp; 🔄 Update <b>${c('update')}</b> &nbsp;|&nbsp; ✔️ बदल नाही <b>${c('same')}</b> &nbsp;|&nbsp; ⏭ Skip <b>${c('blank')+c('dupfile')+c('ambiguous')+c('phone')}</b></p>
+  <label class="flex items-center gap-2 mb-4"><input type="checkbox" id="ci-ow" ${overwrite?'checked':''}> आधीच्या customers चे भरलेले details पण Excel ने बदला (नाहीतर फक्त रिकामे fields भरले जातील)</label>
+  <div style="max-height:300px;overflow:auto"><table class="data-table"><thead><tr><th>Row</th><th>Customer</th><th>Status</th><th>बदल</th></tr></thead><tbody>
+  ${P.map(p=>`<tr><td>${p.r.line}</td><td>${esc(p.r.name)||'—'}</td><td>${ST[p.st]}</td><td style="font-size:.8rem">${p.ch?Object.keys(p.ch).map(k=>`${k}: ${esc(p.ch[k])}`).join('<br>'):''}</td></tr>`).join('')}
+  </tbody></table></div></div>
+ <div class="modal-footer"><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">Cancel</button><button class="btn btn-success" id="ci-go" ${c('new')+c('update')?'':'disabled'}>✅ ${c('new')} नवीन + ${c('update')} update करा</button></div>`;
+ document.getElementById('ci-ow').onchange=e=>CI.show(e.target.checked);
+ document.getElementById('ci-go').onclick=CI.run;
+};
+CI.run=async()=>{
+ const btn=document.getElementById('ci-go');btn.disabled=true;
+ const fy=State.currentFY,user=State.currentUser.username,now=Utils.nowStr(),today=Utils.todayStr();
+ const news=CI.plan.filter(p=>p.st==='new'),ups=CI.plan.filter(p=>p.st==='update');
+ let done=0,failed=[];
+ try{
+  btn.textContent='नवीन customers जोडत आहे...';
+  if(news.length)await db.customers.bulkAdd(news.map(p=>({fyId:fy.id,customerName:p.r.name,firmName:p.r.firmName,contactNo:p.r.contactNo,panCardNo:p.r.panCardNo,gstNo:p.r.gstNo,aadharNo:p.r.aadharNo,city:p.r.city,dob:p.r.dob,addedBy:p.r.addedBy,address:p.r.address,createdAt:today})));
+  const hist=[];
+  for(let i=0;i<ups.length;i+=5){
+   btn.textContent=`Update ${Math.min(i+5,ups.length)}/${ups.length}...`;
+   await Promise.all(ups.slice(i,i+5).map(async p=>{
+    try{await db.customers.update(p.c.id,p.ch);done++;
+     Object.keys(p.ch).forEach(k=>hist.push({fyId:fy.id,customerId:p.c.id,changedBy:user,changedAt:now,fieldName:k,oldValue:String(p.c[k]??''),newValue:p.ch[k]}));
+    }catch(e){failed.push(p.r.name+': '+e.message)}
+   }));
+  }
+  if(hist.length)await db.editHistory.bulkAdd(hist);
+  await db.activityLog.add({username:user,action:`Customers imported from Excel: ${news.length} new, ${done} updated (${CI.file})`,loggedAt:now});
+ }catch(err){Utils.toast('Import Error: '+err.message+' — आधी जोडलेले customers तसेच राहतील; पुन्हा import केल्यास ते skip होतील.','error');btn.disabled=false;btn.textContent='Retry';return}
+ const skipped=CI.plan.filter(p=>['blank','dupfile','ambiguous','phone'].includes(p.st));
+ document.getElementById('generic-modal-content').innerHTML=`<div class="modal-header"><h3>🎉 Import पूर्ण</h3><button class="btn btn-ghost" onclick="App.UI.closeModal('generic-modal')">✖</button></div>
+ <div class="modal-body marathi"><p>🆕 <b>${news.length}</b> नवीन customers जोडले. 🔄 <b>${done}</b> customers update केले.</p>
+ ${failed.length?`<p class="mt-4" style="color:var(--danger)">❌ ${failed.length} update झाले नाहीत: ${esc(failed.join('; '))}</p>`:''}
+ ${skipped.length?`<p class="mt-4">⏭ ${skipped.length} rows skip झाल्या — कारण Report मध्ये आहे.</p>`:''}</div>
+ <div class="modal-footer"><button class="btn btn-info" id="ci-rep">📥 Report (Excel)</button><button class="btn btn-primary" onclick="App.UI.closeModal('generic-modal')">Close</button></div>`;
+ document.getElementById('ci-rep').onclick=()=>{
+  const out=CI.plan.map(p=>({'Excel Row':p.r.line,'Customer':p.r.name,'Contact':p.r.contactNo,'Result':ST[p.st].replace(/^\S+\s/,''),'Changes':p.ch?Object.keys(p.ch).join(', '):''}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(out),'Report');XLSX.writeFile(wb,'CustomerImport_Report.xlsx');
+ };
+ Utils.toast(`✅ ${news.length} नवीन, ${done} updated`,'success');
+ try{App.Customers.renderView()}catch(e){}
+};
+App.Data.importExcel=CI.pick;
+})();
+</script>
+<script id="perf-prefetch">
+(function(){
+ if(!window.SB)return;
+ const o=App.FY.select.bind(App.FY);
+ App.FY.select=async id=>{
+  try{['customers','bankAccounts','statementRecords'].forEach(t=>db[t].where('fyId').equals(id).toArray().catch(()=>{}))}catch(e){}
+  return o(id);
+ };
 })();
 </script>
 </body>
